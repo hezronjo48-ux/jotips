@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: jotips
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: ADMIN_TOKEN
+        value: jotips2024
