@@ -24,19 +24,14 @@
     html { scroll-behavior: smooth; }
     body { font-family: Inter, system-ui, sans-serif; background: var(--50); color: var(--b); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* Header */
     .header { background: var(--grad); color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-lg); }
     .header-inner { max-width: 1200px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
     .logo { font-size: 22px; font-weight: 900; letter-spacing: -.5px; display: flex; align-items: center; gap: 10px; }
     .logo span { font-weight: 400; font-size: 13px; opacity: .65; }
-
     .server-status { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,.15); }
-    .server-status.online { background: #166534; color: #bbf7d0; }
-    .server-status.offline { background: #991b1b; color: #fecaca; }
+    .server-status.online { background: #166534; color: #bbf7d0; } .server-status.offline { background: #991b1b; color: #fecaca; }
     .server-status .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-    .server-status.online .dot { background: #4ade80; }
-    .server-status.offline .dot { background: #f87171; }
-
+    .server-status.online .dot { background: #4ade80; } .server-status.offline .dot { background: #f87171; }
     .header-actions { display: flex; align-items: center; gap: 8px; }
 
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: var(--rs); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--tr); text-decoration: none; }
@@ -52,23 +47,20 @@
     .admin-panel { display: none; }
     .admin-panel.active { display: block; }
 
-    /* Section */
     .section-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
     .section-title { font-size: 20px; font-weight: 800; color: var(--sea-dark); display: flex; align-items: center; gap: 8px; }
     .tip-count { font-size: 12px; font-weight: 600; background: var(--100); color: var(--500); padding: 2px 10px; border-radius: 20px; }
 
-    /* Form */
     .tip-form { background: #fff; border-radius: var(--r); padding: 26px; box-shadow: var(--shadow); margin-bottom: 32px; border: 1px solid var(--200); }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .form-group { text-align: left; }
-    .form-group.full { grid-column: 1 / -1; }
+    .form-group { text-align: left; } .form-group.full { grid-column: 1 / -1; }
     .form-group label { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: var(--600); margin-bottom: 5px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 11px 15px; border: 2px solid var(--200); border-radius: var(--rs); font-family: inherit; font-size: 14px; outline: none; background: var(--50); transition: var(--tr); }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--sea); background: var(--w); box-shadow: 0 0 0 3px rgba(0,105,148,.1); }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 11px 15px; border: 2px solid var(--200); border-radius: var(--rs); font-family: inherit; font-size: 14px; outline: none; background: var(--50); transition: var(--tr); }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--sea); background: var(--w); box-shadow: 0 0 0 3px rgba(0,105,148,.1); }
     .form-group textarea { resize: vertical; min-height: 65px; }
+    .form-group select { cursor: pointer; }
     .form-actions { display: flex; gap: 10px; margin-top: 18px; }
 
-    /* Password Modal */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(6px); z-index: 200; align-items: center; justify-content: center; animation: fade-in .2s ease; }
     .modal-overlay.active { display: flex; }
     @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -82,7 +74,6 @@
     .modal .btn { width: 100%; justify-content: center; padding: 12px; font-size: 15px; margin-top: 10px; }
     .modal-error { color: #ef4444; font-size: 13px; margin-top: -8px; margin-bottom: 10px; display: none; }
 
-    /* Confirm Modal */
     .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); z-index: 210; align-items: center; justify-content: center; animation: fade-in .15s ease; }
     .confirm-overlay.active { display: flex; }
     .confirm-box { background: #fff; border-radius: var(--r); padding: 28px; width: 90%; max-width: 340px; box-shadow: var(--shadow-xl); text-align: center; animation: slide-up .25s ease; }
@@ -91,22 +82,23 @@
     .confirm-box .actions { display: flex; gap: 10px; justify-content: center; }
     .confirm-box .actions .btn { min-width: 100px; justify-content: center; }
 
-    /* Cards */
-    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
-
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
     .tip-card { background: #fff; border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; transition: var(--tr); animation: card-in .4s ease forwards; opacity: 0; transform: translateY(16px); border: 1px solid var(--200); }
     .tip-card:hover { transform: translateY(-3px) !important; box-shadow: var(--shadow-xl); }
     @keyframes card-in { to { opacity: 1; transform: translateY(0); } }
-    .tip-card:nth-child(1) { animation-delay: .03s; }
-    .tip-card:nth-child(2) { animation-delay: .07s; }
-    .tip-card:nth-child(3) { animation-delay: .11s; }
-    .tip-card:nth-child(4) { animation-delay: .15s; }
+    .tip-card:nth-child(1) { animation-delay: .03s; } .tip-card:nth-child(2) { animation-delay: .07s; }
+    .tip-card:nth-child(3) { animation-delay: .11s; } .tip-card:nth-child(4) { animation-delay: .15s; }
     .tip-card:nth-child(n+5) { animation-delay: .19s; }
 
     .tip-card-header { background: var(--grad); color: #fff; padding: 16px 20px; position: relative; overflow: hidden; }
     .tip-card-header::after { content: ''; position: absolute; top: -40%; right: -15%; width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,.06); }
-    .tip-card-header .tip-name { font-size: 16px; font-weight: 700; line-height: 1.35; position: relative; }
+    .tip-card-header .tip-name { font-size: 16px; font-weight: 700; line-height: 1.35; position: relative; padding-right: 80px; }
     .tip-card-header .tip-date { font-size: 12px; opacity: .75; margin-top: 4px; position: relative; }
+
+    .result-badge { position: absolute; top: 14px; right: 16px; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: .5px; }
+    .result-badge.pending { background: rgba(255,255,255,.15); color: rgba(255,255,255,.8); }
+    .result-badge.won { background: #166534; color: #bbf7d0; }
+    .result-badge.lost { background: #991b1b; color: #fecaca; }
 
     .tip-card-body { padding: 16px 20px; }
     .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--100); gap: 10px; }
@@ -114,18 +106,34 @@
     .tip-label { font-size: 11px; font-weight: 600; color: var(--400); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
     .tip-value { font-size: 14px; font-weight: 600; color: var(--800); text-align: right; word-break: break-all; }
     .tip-value.code { font-family: 'Courier New', monospace; font-size: 15px; color: var(--sea-dark); font-weight: 800; letter-spacing: .2px; }
+
+    .result-select { font-size: 12px; padding: 4px 8px; border: 2px solid var(--200); border-radius: 6px; font-family: inherit; cursor: pointer; background: var(--50); }
+    .result-select:focus { border-color: var(--sea); outline: none; }
+
     .tip-note { margin-top: 10px; padding: 10px 14px; background: var(--50); border-radius: var(--rs); font-size: 13px; color: var(--600); line-height: 1.6; border-left: 3px solid var(--sea-light); }
+
+    .comments-section { margin-top: 10px; border-top: 1px solid var(--100); padding-top: 10px; }
+    .comments-toggle { background: none; border: none; color: var(--500); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 4px 0; }
+    .comments-toggle:hover { color: var(--sea); }
+    .comments-list { display: none; margin-top: 8px; }
+    .comments-list.open { display: block; }
+    .comment-item { padding: 8px 0; border-bottom: 1px solid var(--100); font-size: 13px; }
+    .comment-item:last-child { border-bottom: none; }
+    .comment-author { font-weight: 600; color: var(--700); }
+    .comment-text { color: var(--600); margin-top: 2px; }
+    .comment-time { font-size: 11px; color: var(--400); margin-top: 2px; }
+    .comment-del { background: none; border: none; color: var(--400); cursor: pointer; font-size: 12px; padding: 2px 4px; float: right; }
+    .comment-del:hover { color: #ef4444; }
+    .no-comments { font-size: 12px; color: var(--400); padding: 8px 0; }
 
     .tip-card-footer { padding: 10px 20px; border-top: 1px solid var(--100); display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
 
-    /* Skeleton */
-    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
+    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
     .skeleton { background: #fff; border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--200); }
     .skeleton-head { height: 75px; background: linear-gradient(90deg, var(--100) 25%, var(--200) 50%, var(--100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
     .skeleton-body { padding: 16px 20px; }
     .skeleton-line { height: 14px; border-radius: 8px; background: linear-gradient(90deg, var(--100) 25%, var(--200) 50%, var(--100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 10px; }
-    .skeleton-line:nth-child(2) { width: 70%; }
-    .skeleton-line:nth-child(3) { width: 45%; }
+    .skeleton-line:nth-child(2) { width: 70%; } .skeleton-line:nth-child(3) { width: 45%; }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
     .empty-state { text-align: center; padding: 60px 20px; }
@@ -133,16 +141,11 @@
     .empty-state h3 { font-size: 18px; margin-bottom: 6px; color: var(--700); }
     .empty-state p { font-size: 14px; color: var(--400); margin-bottom: 16px; }
 
-    /* Toast */
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px) scale(.9); background: var(--800); color: #fff; padding: 12px 24px; border-radius: var(--rs); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); z-index: 300; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-    .toast.success { background: #166534; }
-    .toast.error { background: #991b1b; }
+    .toast.success { background: #166534; } .toast.error { background: #991b1b; }
 
-    ::-webkit-scrollbar { width: 7px; }
-    ::-webkit-scrollbar-track { background: var(--100); }
-    ::-webkit-scrollbar-thumb { background: var(--300); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--400); }
+    ::-webkit-scrollbar { width: 7px; } ::-webkit-scrollbar-track { background: var(--100); } ::-webkit-scrollbar-thumb { background: var(--300); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: var(--400); }
 
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
@@ -168,7 +171,6 @@
 </div>
 
 <div class="container">
-  <!-- Password Modal -->
   <div class="modal-overlay active" id="passwordModal">
     <div class="modal">
       <div class="lock-icon">🔒</div>
@@ -180,19 +182,17 @@
     </div>
   </div>
 
-  <!-- Confirm Modal -->
   <div class="confirm-overlay" id="confirmModal">
     <div class="confirm-box">
-      <h3 id="confirmTitle">Delete this tip?</h3>
-      <p id="confirmMsg">This action cannot be undone.</p>
+      <h3 id="confirmTitle">Confirm</h3>
+      <p id="confirmMsg">Are you sure?</p>
       <div class="actions">
         <button class="btn btn-so" id="confirmCancel" onclick="closeConfirm()">Cancel</button>
-        <button class="btn btn-danger" id="confirmOk" onclick="confirmAction()">Delete</button>
+        <button class="btn btn-danger" id="confirmOk" onclick="confirmAction()">Confirm</button>
       </div>
     </div>
   </div>
 
-  <!-- Admin Panel -->
   <div class="admin-panel" id="adminPanel">
     <div class="section-header">
       <div class="section-title">✏️ Post a Tip</div>
@@ -220,6 +220,14 @@
           <label>🔑 Betting Code</label>
           <input type="text" id="tipCode" placeholder="e.g. 1X2-12345-ABCDE" required>
         </div>
+        <div class="form-group">
+          <label>📊 Result</label>
+          <select id="tipResult">
+            <option value="pending">Pending</option>
+            <option value="won">Won ✅</option>
+            <option value="lost">Lost ❌</option>
+          </select>
+        </div>
         <div class="form-group full">
           <label>📝 Note <span style="font-weight:400;color:var(--400);font-size:12px">(optional)</span></label>
           <textarea id="tipNote" placeholder="Any additional details or predictions..."></textarea>
@@ -242,6 +250,7 @@
 
 <script>
   const API = window.location.origin + '/api/tips';
+  const COMMENT_API = window.location.origin + '/api/comments';
   let tips = [], adminToken = '', confirmCallback = null;
 
   function fetchTips() {
@@ -260,9 +269,22 @@
       .then(r => { if (r.status === 401) { showToast('Session expired', 'error'); logout(); return null; } if (!r.ok) throw Error(); return r.json(); });
   }
 
+  function updateTip(id, data) {
+    return fetch(API + '/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify(data) })
+      .then(r => { if (r.status === 401) { showToast('Session expired', 'error'); logout(); return null; } if (!r.ok) throw Error(); return r.json(); });
+  }
+
   function deleteTipOnServer(id) {
     return fetch(API + '/' + id, { method: 'DELETE', headers: { 'x-admin-token': adminToken } })
       .then(r => { if (r.status === 401) { showToast('Session expired', 'error'); logout(); return false; } return r.ok; });
+  }
+
+  function fetchComments(tipId) {
+    return fetch(COMMENT_API + '/' + tipId).then(r => r.json());
+  }
+
+  function deleteComment(id) {
+    return fetch(COMMENT_API + '/' + id, { method: 'DELETE', headers: { 'x-admin-token': adminToken } }).then(r => r.ok);
   }
 
   function setStatus(state) {
@@ -291,31 +313,42 @@
     document.getElementById('passwordError').style.display = 'none';
   }
 
-  function renderAll() {
-    renderTips();
-    document.getElementById('tipCount').textContent = tips.length;
-  }
+  function renderAll() { renderTips(); document.getElementById('tipCount').textContent = tips.length; }
 
   function renderTips() {
     const c = document.getElementById('adminTipsList');
-    if (!tips.length) {
-      c.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>No tips yet</h3><p>Post your first betting tip above</p></div>';
-      return;
-    }
+    if (!tips.length) { c.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>No tips yet</h3><p>Post your first betting tip above</p></div>'; return; }
     c.innerHTML = '<div class="tips-grid">' + tips.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
   }
 
   function cardHTML(t, id, i) {
     const d = new Date(t.date), ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     const n = t.note ? `<div class="tip-note">${esc(t.note)}</div>` : '';
-    const od = t.odds ? `<div class="tip-row"><span class="tip-label">Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">${esc(t.odds)}</span></div>` : '';
+    const od = t.odds ? `<div class="tip-row"><span class="tip-label">Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">@ ${esc(t.odds)}</span></div>` : '';
+    const result = t.result || 'pending';
+    const badge = { pending: '⏳ Pending', won: '✅ Won', lost: '❌ Lost' };
     return `<div class="tip-card" style="animation-delay:${Math.min(i * .06, .3)}s">
-      <div class="tip-card-header"><div class="tip-name">${esc(t.name)}</div><div class="tip-date">📅 ${ds}</div></div>
+      <div class="tip-card-header">
+        <div class="tip-name">${esc(t.name)} <span class="result-badge ${result}">${badge[result] || '⏳ Pending'}</span></div>
+        <div class="tip-date">📅 ${ds}</div>
+      </div>
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">Company</span><span class="tip-value">${esc(t.company)}</span></div>
         ${od}
         <div class="tip-row"><span class="tip-label">Code</span><span class="tip-value code">${esc(t.code)}</span></div>
+        <div class="tip-row">
+          <span class="tip-label">Result</span>
+          <select class="result-select" onchange="changeResult('${id}',this.value)">
+            <option value="pending" ${result==='pending'?'selected':''}>⏳ Pending</option>
+            <option value="won" ${result==='won'?'selected':''}>✅ Won</option>
+            <option value="lost" ${result==='lost'?'selected':''}>❌ Lost</option>
+          </select>
+        </div>
         ${n}
+        <div class="comments-section">
+          <button class="comments-toggle" onclick="toggleComments('${id}',this)">💬 <span id="cc-${id}">0</span> comments</button>
+          <div class="comments-list" id="cl-${id}"></div>
+        </div>
       </div>
       <div class="tip-card-footer">
         <button class="btn btn-sm btn-so" onclick="downloadPoster('${id}')">📸 Poster</button>
@@ -326,6 +359,36 @@
 
   function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
+  async function changeResult(id, value) {
+    const r = await updateTip(id, { result: value });
+    if (r) { showToast('Result updated', 'success'); await fetchTips(); }
+  }
+
+  async function toggleComments(tipId, btn) {
+    const list = document.getElementById('cl-' + tipId);
+    if (list.classList.contains('open')) { list.classList.remove('open'); list.innerHTML = ''; return; }
+    list.classList.add('open');
+    list.innerHTML = '<div style="font-size:12px;color:var(--400);padding:8px 0">Loading...</div>';
+    const comments = await fetchComments(tipId);
+    if (!comments.length) {
+      list.innerHTML = '<div class="no-comments">No comments yet</div>';
+    } else {
+      list.innerHTML = comments.map(c => `
+        <div class="comment-item">
+          <button class="comment-del" onclick="delComment('${c.id}','${tipId}')">✕</button>
+          <div class="comment-author">${esc(c.author)}</div>
+          <div class="comment-text">${esc(c.text)}</div>
+          <div class="comment-time">${new Date(c.created).toLocaleString()}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  async function delComment(commentId, tipId) {
+    const ok = await deleteComment(commentId);
+    if (ok) { showToast('Comment deleted'); const btn = document.querySelector(`[onclick*="toggleComments('${tipId}'"]`); if (btn) toggleComments(tipId, btn); fetchTips(); }
+  }
+
   async function saveTip(e) {
     e.preventDefault();
     const name = document.getElementById('tipName').value.trim();
@@ -333,24 +396,19 @@
     const company = document.getElementById('tipCompany').value.trim();
     const code = document.getElementById('tipCode').value.trim();
     const odds = document.getElementById('tipOdds').value.trim();
+    const result = document.getElementById('tipResult').value;
     const note = document.getElementById('tipNote').value.trim();
     if (!name || !date || !company || !code) { showToast('Fill all required fields', 'error'); return; }
-
     const btn = document.getElementById('submitBtn');
     btn.textContent = '⏳ Posting...'; btn.disabled = true;
-
-    const r = await postTip({ name, date, company, code, odds, note });
-    if (r) {
-      resetForm();
-      await fetchTips();
-      showToast('Tip posted! ✓', 'success');
-    }
+    const r = await postTip({ name, date, company, code, odds, result, note });
+    if (r) { resetForm(); await fetchTips(); showToast('Tip posted! ✓', 'success'); }
     btn.textContent = '🚀 Post Tip'; btn.disabled = false;
   }
 
   function confirmDelete(id) {
     document.getElementById('confirmTitle').textContent = 'Delete this tip?';
-    document.getElementById('confirmMsg').textContent = 'This action cannot be undone.';
+    document.getElementById('confirmMsg').textContent = 'This will also delete all comments.';
     document.getElementById('confirmOk').textContent = 'Delete';
     document.getElementById('confirmOk').className = 'btn btn-danger';
     confirmCallback = async () => {
@@ -377,34 +435,28 @@
     const c = document.createElement('canvas'), x = c.getContext('2d');
     const w = 800, h = 1000; c.width = w; c.height = h; const p = 40;
     const d = new Date(tip.date), ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-
     const g = x.createLinearGradient(0, 0, w, h);
     g.addColorStop(0, '#006994'); g.addColorStop(.5, '#0088b0'); g.addColorStop(1, '#00557a');
     x.fillStyle = g; x.fillRect(0, 0, w, h);
-
     x.fillStyle = 'rgba(255,255,255,.04)';
     x.beginPath(); x.arc(100, 100, 220, 0, Math.PI * 2); x.fill();
     x.beginPath(); x.arc(680, 920, 280, 0, Math.PI * 2); x.fill();
     x.beginPath(); x.arc(400, 500, 380, 0, Math.PI * 2); x.fill();
-
     x.fillStyle = 'rgba(255,255,255,.25)'; x.font = 'bold 15px Inter, sans-serif'; x.textAlign = 'left';
     x.fillText('JOTIPS', p, 65);
     x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '13px Inter, sans-serif'; x.textAlign = 'right';
     x.fillText(ds, w - p, 65);
-
     x.strokeStyle = 'rgba(255,255,255,.1)'; x.lineWidth = 1;
     x.beginPath(); x.moveTo(p, 85); x.lineTo(w - p, 85); x.stroke();
-
     x.fillStyle = '#fff'; x.textAlign = 'center'; x.font = 'bold 38px Inter, sans-serif';
     const nl = wrap(x, tip.name, w - p * 2, 38); let y = 180;
     for (const l of nl) { x.fillText(l, w / 2, y); y += 48; }
-
     y = Math.max(y + 16, 260);
     x.fillStyle = 'rgba(255,255,255,.12)'; rRect(x, w / 2 - 100, y - 26, 200, 36, 18); x.fill();
     x.fillStyle = 'rgba(255,255,255,.9)'; x.font = 'bold 13px Inter, sans-serif';
     x.fillText('BETTING TIP', w / 2, y - 2); y += 40;
-
-    const cx = p + 20, cw = w - p * 2 - 40, cy = y, ch = 180;
+    const hasOdds = tip.odds ? 45 : 0;
+    const cx = p + 20, cw = w - p * 2 - 40, cy = y, ch = 180 + hasOdds;
     x.fillStyle = 'rgba(255,255,255,.08)'; rRect(x, cx, cy, cw, ch, 16); x.fill();
     x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '12px Inter, sans-serif'; x.textAlign = 'left';
     x.fillText('BETTING COMPANY', cx + 30, cy + 35);
@@ -414,14 +466,12 @@
     x.fillText('BETTING CODE', cx + 30, cy + 105);
     x.fillStyle = '#fff'; x.font = 'bold 34px "Courier New", monospace';
     x.fillText(tip.code, cx + 30, cy + 148);
-
     if (tip.odds) {
       x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '12px Inter, sans-serif';
       x.fillText('TOTAL ODDS', cx + 30, cy + 195);
       x.fillStyle = '#fff'; x.font = 'bold 28px Inter, sans-serif';
       x.fillText('@ ' + tip.odds, cx + 30, cy + 225);
     }
-
     let ny = cy + ch + 30;
     if (tip.note) {
       x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '12px Inter, sans-serif';
@@ -429,10 +479,15 @@
       x.fillStyle = 'rgba(255,255,255,.85)'; x.font = '15px Inter, sans-serif';
       for (const l of wrap(x, tip.note, cw, 15)) { x.fillText(l, cx, ny); ny += 22; }
     }
-
+    const result = tip.result || 'pending';
+    if (result !== 'pending') {
+      ny += 10;
+      x.fillStyle = result === 'won' ? '#4ade80' : '#f87171';
+      x.font = 'bold 22px Inter, sans-serif'; x.textAlign = 'center';
+      x.fillText(result === 'won' ? '✅ WON' : '❌ LOST', w / 2, ny + 20);
+    }
     x.fillStyle = 'rgba(255,255,255,.25)'; x.font = '11px Inter, sans-serif'; x.textAlign = 'center';
     x.fillText('JOTIPS — Betting Tips & Predictions', w / 2, h - 30);
-
     const a = document.createElement('a');
     a.download = `jotips-${tip.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}.png`;
     a.href = c.toDataURL('image/png'); a.click();
@@ -449,22 +504,16 @@
 
   function wrap(x, t, mw) {
     const ws = t.split(' '), ls = []; let cur = '';
-    for (const w of ws) {
-      const test = cur ? cur + ' ' + w : w;
-      if (x.measureText(test).width > mw && cur) { ls.push(cur); cur = w; } else { cur = test; }
-    }
-    if (cur) ls.push(cur);
-    return ls.length ? ls : [t];
+    for (const w of ws) { const test = cur ? cur + ' ' + w : w; if (x.measureText(test).width > mw && cur) { ls.push(cur); cur = w; } else { cur = test; } }
+    if (cur) ls.push(cur); return ls.length ? ls : [t];
   }
 
   function showToast(m, type) {
     const e = document.getElementById('toast'); e.textContent = m;
-    e.className = 'toast' + (type ? ' ' + type : '');
-    e.classList.add('show');
+    e.className = 'toast' + (type ? ' ' + type : ''); e.classList.add('show');
     clearTimeout(window._t); window._t = setTimeout(() => e.classList.remove('show'), 2500);
   }
 
-  // Close modals on overlay click
   document.getElementById('passwordModal').addEventListener('click', function(e) { if (e.target === this) logout(); });
   document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) closeConfirm(); });
   document.getElementById('passwordInput').focus();

@@ -9,9 +9,8 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --sea: #006994; --sea-light: #0088b0; --sea-dark: #004b6b; --sea-glow: #00a3d4;
-      --grad: linear-gradient(135deg, #006994, #0088b0);
-      --grad-dark: linear-gradient(135deg, #004b6b, #006994);
+      --sea: #006994; --sea-light: #0088b0; --sea-dark: #004b6b;
+      --grad: linear-gradient(135deg, #006994, #0088b0); --grad-dark: linear-gradient(135deg, #004b6b, #006994);
       --w: #fff; --b: #0f172a;
       --50: #f8fafc; --100: #f1f5f9; --200: #e2e8f0; --300: #cbd5e1;
       --400: #94a3b8; --500: #64748b; --600: #475569; --700: #334155; --800: #1e293b;
@@ -25,7 +24,6 @@
     html { scroll-behavior: smooth; }
     body { font-family: Inter, system-ui, sans-serif; background: var(--50); color: var(--b); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* Header */
     .header { background: var(--grad); color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-lg); }
     .header-inner { max-width: 1200px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
     .logo { font-size: 26px; font-weight: 900; letter-spacing: -.5px; }
@@ -35,17 +33,14 @@
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse-dot 1.5s ease-in-out infinite; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 
-    /* Hero */
     .hero { background: var(--grad-dark); color: #fff; text-align: center; padding: 40px 20px 36px; position: relative; overflow: hidden; }
     .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 50%, rgba(255,255,255,.08) 0%, transparent 60%), radial-gradient(circle at 70% 50%, rgba(255,255,255,.05) 0%, transparent 50%); }
     .hero h1 { font-size: 28px; font-weight: 800; position: relative; }
     .hero h1 span { color: rgba(255,255,255,.5); font-weight: 400; }
     .hero p { font-size: 14px; opacity: .7; margin-top: 6px; position: relative; }
 
-    /* Container */
     .container { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
 
-    /* Controls bar */
     .controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
     .controls-left { display: flex; align-items: center; gap: 10px; }
     .section-title { font-size: 20px; font-weight: 800; color: var(--sea-dark); }
@@ -54,37 +49,32 @@
     .controls-right button { background: none; border: none; cursor: pointer; color: var(--sea); font-size: 16px; padding: 4px; transition: var(--tr); }
     .controls-right button:hover { transform: rotate(60deg); }
 
-    /* Buttons */
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: var(--rs); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--tr); text-decoration: none; }
-    .btn-sea { background: var(--grad); color: #fff; }
-    .btn-sea:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-    .btn-sea-outline { background: transparent; color: var(--sea); border: 2px solid var(--sea); }
-    .btn-sea-outline:hover { background: var(--sea); color: #fff; }
-    .btn-ghost { background: transparent; color: var(--600); }
-    .btn-ghost:hover { background: var(--100); }
+    .btn-sea { background: var(--grad); color: #fff; } .btn-sea:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .btn-sea-outline { background: transparent; color: var(--sea); border: 2px solid var(--sea); } .btn-sea-outline:hover { background: var(--sea); color: #fff; }
     .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-xs { padding: 5px 10px; font-size: 11px; border-radius: 7px; }
 
-    /* Tips Grid */
-    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
 
-    /* Card */
     .tip-card { background: #fff; border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; transition: var(--tr); opacity: 0; transform: translateY(20px); animation: card-in .5s ease forwards; }
     .tip-card:hover { transform: translateY(-4px) !important; box-shadow: var(--shadow-xl); }
     @keyframes card-in { to { opacity: 1; transform: translateY(0); } }
-    .tip-card:nth-child(1) { animation-delay: .05s; }
-    .tip-card:nth-child(2) { animation-delay: .1s; }
-    .tip-card:nth-child(3) { animation-delay: .15s; }
-    .tip-card:nth-child(4) { animation-delay: .2s; }
-    .tip-card:nth-child(5) { animation-delay: .25s; }
-    .tip-card:nth-child(6) { animation-delay: .3s; }
-    .tip-card:nth-child(7) { animation-delay: .35s; }
-    .tip-card:nth-child(8) { animation-delay: .4s; }
+    .tip-card:nth-child(1) { animation-delay: .05s; } .tip-card:nth-child(2) { animation-delay: .1s; }
+    .tip-card:nth-child(3) { animation-delay: .15s; } .tip-card:nth-child(4) { animation-delay: .2s; }
+    .tip-card:nth-child(5) { animation-delay: .25s; } .tip-card:nth-child(6) { animation-delay: .3s; }
+    .tip-card:nth-child(7) { animation-delay: .35s; } .tip-card:nth-child(8) { animation-delay: .4s; }
     .tip-card:nth-child(n+9) { animation-delay: .45s; }
 
     .tip-card-header { background: var(--grad); color: #fff; padding: 18px 22px; position: relative; overflow: hidden; }
     .tip-card-header::after { content: ''; position: absolute; top: -50%; right: -20%; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.06); }
-    .tip-card-header .tip-name { font-size: 17px; font-weight: 700; line-height: 1.35; position: relative; }
+    .tip-card-header .tip-name { font-size: 17px; font-weight: 700; line-height: 1.35; position: relative; padding-right: 90px; }
     .tip-card-header .tip-date { font-size: 12px; opacity: .75; margin-top: 5px; display: flex; align-items: center; gap: 5px; position: relative; }
+
+    .result-badge { position: absolute; top: 16px; right: 18px; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: .5px; }
+    .result-badge.pending { background: rgba(255,255,255,.15); color: rgba(255,255,255,.8); }
+    .result-badge.won { background: #166534; color: #bbf7d0; }
+    .result-badge.lost { background: #991b1b; color: #fecaca; }
 
     .tip-card-body { padding: 18px 22px; }
     .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--100); gap: 12px; }
@@ -100,10 +90,30 @@
 
     .tip-note { margin-top: 12px; padding: 10px 14px; background: var(--50); border-radius: var(--rs); font-size: 13px; color: var(--600); line-height: 1.6; border-left: 3px solid var(--sea-light); }
 
+    /* Comments */
+    .comments-section { margin-top: 12px; border-top: 1px solid var(--100); padding-top: 12px; }
+    .comments-toggle { background: none; border: none; color: var(--500); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 4px 0; }
+    .comments-toggle:hover { color: var(--sea); }
+    .comments-list { display: none; margin-top: 8px; }
+    .comments-list.open { display: block; }
+    .comment-item { padding: 8px 0; border-bottom: 1px solid var(--100); font-size: 13px; }
+    .comment-item:last-child { border-bottom: none; }
+    .comment-author { font-weight: 600; color: var(--700); font-size: 12px; }
+    .comment-text { color: var(--600); margin-top: 2px; }
+    .comment-time { font-size: 11px; color: var(--400); margin-top: 2px; }
+    .no-comments { font-size: 12px; color: var(--400); padding: 8px 0; }
+
+    .comment-form { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .comment-form input, .comment-form textarea { padding: 8px 10px; border: 2px solid var(--200); border-radius: 6px; font-family: inherit; font-size: 12px; outline: none; transition: var(--tr); }
+    .comment-form input:focus, .comment-form textarea:focus { border-color: var(--sea); }
+    .comment-form textarea { resize: vertical; min-height: 40px; }
+    .comment-form .row { display: flex; gap: 6px; }
+    .comment-form .row input { flex: 1; }
+    .comment-form .row .btn { flex-shrink: 0; }
+
     .tip-card-footer { padding: 12px 22px; border-top: 1px solid var(--100); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 
-    /* Skeleton */
-    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
     .skeleton { background: #fff; border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
     .skeleton-head { height: 80px; background: linear-gradient(90deg, var(--100) 25%, var(--200) 50%, var(--100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
     .skeleton-body { padding: 18px 22px; }
@@ -111,41 +121,31 @@
     .skeleton-line:last-child { width: 60%; }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-    /* States */
     .empty-state, .error-state { text-align: center; padding: 80px 20px; }
     .empty-state .icon, .error-state .icon { font-size: 56px; margin-bottom: 16px; opacity: .5; }
     .empty-state h3, .error-state h3 { font-size: 20px; margin-bottom: 8px; color: var(--700); }
     .empty-state p, .error-state p { font-size: 14px; color: var(--400); margin-bottom: 16px; max-width: 400px; margin-left: auto; margin-right: auto; }
 
-    /* Toast */
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px) scale(.9); background: var(--800); color: #fff; padding: 12px 24px; border-radius: var(--rs); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); z-index: 300; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 
-    /* Back to top */
     .back-top { position: fixed; bottom: 30px; right: 24px; width: 44px; height: 44px; border-radius: 50%; background: var(--grad); color: #fff; border: none; cursor: pointer; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(20px); transition: var(--tr); z-index: 99; font-size: 18px; }
     .back-top.visible { opacity: 1; transform: translateY(0); }
     .back-top:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl); }
 
-    /* Footer */
     .footer { text-align: center; padding: 32px 20px; color: var(--400); font-size: 13px; border-top: 1px solid var(--200); margin-top: 40px; }
     .footer a { color: var(--sea); text-decoration: none; }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 7px; }
-    ::-webkit-scrollbar-track { background: var(--100); }
-    ::-webkit-scrollbar-thumb { background: var(--300); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--400); }
+    ::-webkit-scrollbar { width: 7px; } ::-webkit-scrollbar-track { background: var(--100); } ::-webkit-scrollbar-thumb { background: var(--300); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: var(--400); }
 
     @media (max-width: 640px) {
-      .hero h1 { font-size: 22px; }
-      .hero { padding: 28px 16px 24px; }
+      .hero h1 { font-size: 22px; } .hero { padding: 28px 16px 24px; }
       .container { padding: 20px 12px; }
       .logo { font-size: 22px; } .logo span { font-size: 12px; }
       .section-title { font-size: 17px; }
       .tips-grid { grid-template-columns: 1fr; }
       .skeleton-grid { grid-template-columns: 1fr; }
       .header-inner { padding: 12px 16px; }
-      .live-badge { font-size: 10px; padding: 3px 10px; }
     }
   </style>
 </head>
@@ -176,7 +176,6 @@
       <button onclick="loadTips()" title="Refresh">↻</button>
     </div>
   </div>
-
   <div id="tipsContainer"></div>
 </div>
 
@@ -190,21 +189,14 @@
 
 <script>
   const API = window.location.origin + '/api/tips';
+  const COMMENT_API = window.location.origin + '/api/comments';
   let tips = [];
 
   async function loadTips() {
     const c = document.getElementById('tipsContainer');
-    c.innerHTML = '<div class="skeleton-grid">' + Array(4).fill(`
-      <div class="skeleton">
-        <div class="skeleton-head"></div>
-        <div class="skeleton-body">
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line" style="width:75%"></div>
-          <div class="skeleton-line" style="width:40%"></div>
-        </div>
-      </div>
-    `).join('') + '</div>';
-
+    c.innerHTML = '<div class="skeleton-grid">' + Array(4).fill(
+      '<div class="skeleton"><div class="skeleton-head"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line" style="width:75%"></div><div class="skeleton-line" style="width:40%"></div></div></div>'
+    ).join('') + '</div>';
     try {
       const r = await fetch(API);
       if (!r.ok) throw Error('HTTP ' + r.status);
@@ -225,14 +217,32 @@
     const d = new Date(t.date);
     const ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     const n = t.note ? `<div class="tip-note">${esc(t.note)}</div>` : '';
-    const od = t.odds ? `<div class="tip-row"><span class="tip-label">🎯 Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">${esc(t.odds)}</span></div>` : '';
+    const od = t.odds ? `<div class="tip-row"><span class="tip-label">🎯 Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">@ ${esc(t.odds)}</span></div>` : '';
+    const result = t.result || 'pending';
+    const badge = { pending: '⏳ Pending', won: '✅ Won', lost: '❌ Lost' };
     return `<div class="tip-card" style="animation-delay:${Math.min(i * .05, .4)}s">
-      <div class="tip-card-header"><div class="tip-name">${esc(t.name)}</div><div class="tip-date">📅 ${ds}</div></div>
+      <div class="tip-card-header">
+        <div class="tip-name">${esc(t.name)} <span class="result-badge ${result}">${badge[result]}</span></div>
+        <div class="tip-date">📅 ${ds}</div>
+      </div>
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">🏢 Company</span><span class="tip-value">${esc(t.company)}</span></div>
         ${od}
         <div class="tip-row"><span class="tip-label">🔑 Code</span><div class="code-wrap"><span class="tip-value code">${esc(t.code)}</span><button class="copy-btn" onclick="copyCode('${esc(t.code)}',this)" title="Copy code">📋</button></div></div>
         ${n}
+        <div class="comments-section">
+          <button class="comments-toggle" onclick="toggleComments('${id}', this)">💬 <span id="cc-${id}">0</span> comments</button>
+          <div class="comments-list" id="cl-${id}">
+            <div class="no-comments">Loading...</div>
+          </div>
+          <div class="comment-form">
+            <div class="row">
+              <input type="text" id="ca-${id}" placeholder="Your name" maxlength="30">
+              <button class="btn btn-sea btn-xs" onclick="submitComment('${id}')">Send</button>
+            </div>
+            <textarea id="ct-${id}" placeholder="Write a comment..." maxlength="500" rows="2" style="display:none" id="cta-${id}"></textarea>
+          </div>
+        </div>
       </div>
       <div class="tip-card-footer">
         <button class="btn btn-sm btn-sea-outline" onclick="downloadPoster('${id}')">📸 Poster</button>
@@ -246,13 +256,68 @@
 
   function copyCode(code, btn) {
     navigator.clipboard.writeText(code).then(() => {
-      btn.textContent = '✓';
-      btn.classList.add('copied');
+      btn.textContent = '✓'; btn.classList.add('copied');
       setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
     }).catch(() => showToast('Could not copy'));
   }
 
-  // Scroll to top button
+  // Comments
+  async function toggleComments(tipId, btn) {
+    const list = document.getElementById('cl-' + tipId);
+    if (list.classList.contains('open')) { list.classList.remove('open'); return; }
+    list.classList.add('open');
+    try {
+      const r = await fetch(COMMENT_API + '/' + tipId);
+      const comments = await r.json();
+      const count = document.getElementById('cc-' + tipId);
+      count.textContent = comments.length;
+      if (!comments.length) {
+        list.innerHTML = '<div class="no-comments">No comments yet. Be the first!</div>';
+      } else {
+        list.innerHTML = comments.map(c => `
+          <div class="comment-item">
+            <div class="comment-author">👤 ${esc(c.author)}</div>
+            <div class="comment-text">${esc(c.text)}</div>
+            <div class="comment-time">${timeAgo(c.created)}</div>
+          </div>
+        `).join('');
+      }
+    } catch(e) {
+      list.innerHTML = '<div class="no-comments">Could not load comments</div>';
+    }
+  }
+
+  async function submitComment(tipId) {
+    const author = document.getElementById('ca-' + tipId).value.trim();
+    const text = document.getElementById('ct-' + tipId).value.trim();
+    if (!author || !text) { showToast('Enter your name and comment'); return; }
+    try {
+      const r = await fetch(COMMENT_API + '/' + tipId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ author, text })
+      });
+      if (!r.ok) throw Error();
+      document.getElementById('ct-' + tipId).value = '';
+      showToast('Comment posted!');
+      const btn = document.querySelector(`.comments-toggle[onclick*="'${tipId}'"]`);
+      if (btn) toggleComments(tipId, btn);
+    } catch(e) { showToast('Failed to post comment'); }
+  }
+
+  function timeAgo(dateStr) {
+    const now = Date.now(), d = new Date(dateStr).getTime();
+    const sec = Math.floor((now - d) / 1000);
+    if (sec < 60) return 'just now';
+    const min = Math.floor(sec / 60);
+    if (min < 60) return min + 'm ago';
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return hr + 'h ago';
+    const days = Math.floor(hr / 24);
+    return days + 'd ago';
+  }
+
+  // Scroll to top
   window.addEventListener('scroll', () => {
     document.getElementById('backTop').classList.toggle('visible', window.scrollY > 400);
   });
@@ -263,33 +328,26 @@
     const c = document.createElement('canvas'), x = c.getContext('2d');
     const w = 800, h = 1000; c.width = w; c.height = h; const p = 40;
     const d = new Date(tip.date), ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-
     const g = x.createLinearGradient(0, 0, w, h);
     g.addColorStop(0, '#006994'); g.addColorStop(.5, '#0088b0'); g.addColorStop(1, '#00557a');
     x.fillStyle = g; x.fillRect(0, 0, w, h);
-
     x.fillStyle = 'rgba(255,255,255,.04)';
     x.beginPath(); x.arc(100, 100, 220, 0, Math.PI * 2); x.fill();
     x.beginPath(); x.arc(680, 920, 280, 0, Math.PI * 2); x.fill();
     x.beginPath(); x.arc(400, 500, 380, 0, Math.PI * 2); x.fill();
-
     x.fillStyle = 'rgba(255,255,255,.25)'; x.font = 'bold 15px Inter, sans-serif'; x.textAlign = 'left';
     x.fillText('JOTIPS', p, 65);
     x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '13px Inter, sans-serif'; x.textAlign = 'right';
     x.fillText(ds, w - p, 65);
-
     x.strokeStyle = 'rgba(255,255,255,.1)'; x.lineWidth = 1;
     x.beginPath(); x.moveTo(p, 85); x.lineTo(w - p, 85); x.stroke();
-
     x.fillStyle = '#fff'; x.textAlign = 'center'; x.font = 'bold 38px Inter, sans-serif';
     const nl = wrap(x, tip.name, w - p * 2, 38); let y = 180;
     for (const l of nl) { x.fillText(l, w / 2, y); y += 48; }
-
     y = Math.max(y + 16, 260);
     x.fillStyle = 'rgba(255,255,255,.12)'; rRect(x, w / 2 - 100, y - 26, 200, 36, 18); x.fill();
     x.fillStyle = 'rgba(255,255,255,.9)'; x.font = 'bold 13px Inter, sans-serif';
     x.fillText('BETTING TIP', w / 2, y - 2); y += 40;
-
     const hasOdds = tip.odds ? 45 : 0;
     const cx = p + 20, cw = w - p * 2 - 40, cy = y, ch = 180 + hasOdds;
     x.fillStyle = 'rgba(255,255,255,.08)'; rRect(x, cx, cy, cw, ch, 16); x.fill();
@@ -307,7 +365,6 @@
       x.fillStyle = '#fff'; x.font = 'bold 28px Inter, sans-serif';
       x.fillText('@ ' + tip.odds, cx + 30, cy + 225);
     }
-
     let ny = cy + ch + 30;
     if (tip.note) {
       x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '12px Inter, sans-serif';
@@ -315,10 +372,15 @@
       x.fillStyle = 'rgba(255,255,255,.85)'; x.font = '15px Inter, sans-serif';
       for (const l of wrap(x, tip.note, cw, 15)) { x.fillText(l, cx, ny); ny += 22; }
     }
-
+    const result = tip.result || 'pending';
+    if (result !== 'pending') {
+      ny += 10;
+      x.fillStyle = result === 'won' ? '#4ade80' : '#f87171';
+      x.font = 'bold 22px Inter, sans-serif'; x.textAlign = 'center';
+      x.fillText(result === 'won' ? '✅ WON' : '❌ LOST', w / 2, ny + 20);
+    }
     x.fillStyle = 'rgba(255,255,255,.25)'; x.font = '11px Inter, sans-serif'; x.textAlign = 'center';
     x.fillText('JOTIPS — Betting Tips & Predictions', w / 2, h - 30);
-
     const a = document.createElement('a');
     a.download = `jotips-${tip.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}.png`;
     a.href = c.toDataURL('image/png'); a.click();
@@ -335,12 +397,8 @@
 
   function wrap(x, t, mw) {
     const ws = t.split(' '), ls = []; let cur = '';
-    for (const w of ws) {
-      const test = cur ? cur + ' ' + w : w;
-      if (x.measureText(test).width > mw && cur) { ls.push(cur); cur = w; } else { cur = test; }
-    }
-    if (cur) ls.push(cur);
-    return ls.length ? ls : [t];
+    for (const w of ws) { const test = cur ? cur + ' ' + w : w; if (x.measureText(test).width > mw && cur) { ls.push(cur); cur = w; } else { cur = test; } }
+    if (cur) ls.push(cur); return ls.length ? ls : [t];
   }
 
   function showToast(m) {
