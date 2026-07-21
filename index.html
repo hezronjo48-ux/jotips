@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JOTIPS - Betting Tips & Predictions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sea-blue: #006994; --sea-light: #0088b0; --sea-dark: #004b6b;
+      --sea-gradient: linear-gradient(135deg, #006994, #0088b0);
+      --white: #ffffff; --gray-50: #f8fafc; --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0; --gray-300: #cbd5e1; --gray-400: #94a3b8;
+      --gray-500: #64748b; --gray-700: #334155; --gray-900: #0f172a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+      --radius: 12px; --radius-sm: 8px;
+    }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+    .header { background: var(--sea-gradient); color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100; }
+    .header-inner { width: 100%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; }
+    .logo span { color: rgba(255,255,255,0.7); font-weight: 400; font-size: 14px; }
+    .header-subtitle { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .section-title { font-size: 22px; font-weight: 800; color: var(--sea-dark); }
+    .last-updated { font-size: 12px; color: var(--gray-400); display: flex; align-items: center; gap: 6px; }
+    .refresh-btn { background: none; border: none; color: var(--sea-blue); cursor: pointer; font-size: 18px; padding: 4px; }
+    .refresh-btn:hover { transform: rotate(45deg); }
+    .btn { padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-sea { background: var(--sea-gradient); color: white; } .btn-sea:hover { box-shadow: var(--shadow-md); }
+    .btn-sea-outline { background: transparent; color: var(--sea-blue); border: 2px solid var(--sea-blue); } .btn-sea-outline:hover { background: var(--sea-blue); color: white; }
+
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .tip-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .tip-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .tip-card-header { background: var(--sea-gradient); color: white; padding: 16px 20px; }
+    .tip-card-header .tip-name { font-size: 17px; font-weight: 700; line-height: 1.3; }
+    .tip-card-header .tip-date { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+    .tip-card-body { padding: 16px 20px; }
+    .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+    .tip-row:last-child { border-bottom: none; }
+    .tip-label { font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.3px; }
+    .tip-value { font-size: 14px; font-weight: 600; color: var(--gray-900); text-align: right; word-break: break-all; }
+    .tip-value.code { font-family: monospace; font-size: 16px; color: var(--sea-dark); font-weight: 800; }
+    .tip-note { margin-top: 12px; padding: 10px 12px; background: var(--gray-50); border-radius: var(--radius-sm); font-size: 13px; color: var(--gray-700); line-height: 1.5; }
+    .tip-card-footer { padding: 10px 20px; border-top: 1px solid var(--gray-100); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+    .empty-state { text-align: center; padding: 80px 20px; color: var(--gray-500); }
+    .empty-state h3 { font-size: 20px; margin-bottom: 8px; color: var(--gray-700); }
+    .empty-state p { font-size: 14px; }
+    .footer { text-align: center; padding: 32px 16px; color: var(--gray-400); font-size: 13px; }
+    .loading { text-align: center; padding: 60px 20px; color: var(--gray-400); }
+    .loading .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--gray-200); border-top-color: var(--sea-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-state { text-align: center; padding: 60px 20px; }
+    .error-state h3 { font-size: 18px; color: var(--gray-700); margin-bottom: 8px; }
+    .error-state p { font-size: 14px; color: var(--gray-500); margin-bottom: 16px; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gray-900); color: white; padding: 12px 24px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; transition: all 0.3s; z-index: 300; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 640px) {
+      .header { padding: 12px 16px; }
+      .logo { font-size: 22px; } .logo span { font-size: 12px; }
+      .section-title { font-size: 18px; }
+      .tips-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">JOTIPS <span>betting tips</span></div>
+    <div class="header-subtitle">Free Predictions</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="section-header">
+    <h2 class="section-title">Latest Tips</h2>
+    <div class="last-updated">
+      <span id="lastUpdated">Loading...</span>
+      <button class="refresh-btn" onclick="loadTips()" title="Refresh">↻</button>
+    </div>
+  </div>
+  <div id="tipsContainer">
+    <div class="loading" id="loadingState">
+      <div class="spinner"></div>
+      <div>Loading tips...</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">JOTIPS &mdash; Betting Tips & Predictions</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = '/api/tips';
+  let tips = [];
+
+  async function loadTips() {
+    const container = document.getElementById('tipsContainer');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><div>Loading tips...</div></div>';
+
+    try {
+      const res = await fetch(window.location.origin + API_BASE);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      tips = await res.json();
+      if (tips.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>No tips yet</h3><p>Check back later for betting tips</p></div>';
+      } else {
+        renderTips();
+      }
+      document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    } catch(e) {
+      container.innerHTML = `
+        <div class="error-state">
+          <h3>Could not load tips</h3>
+          <p>Server is offline. Try again later.</p>
+          <button class="btn btn-sea" onclick="loadTips()">Retry</button>
+        </div>
+      `;
+    }
+  }
+
+  function renderTips() {
+    const container = document.getElementById('tipsContainer');
+    let html = '<div class="tips-grid">';
+    for (let i = 0; i < tips.length; i++) {
+      html += tipCardHTML(tips[i], tips[i].id);
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function tipCardHTML(tip, id) {
+    const d = new Date(tip.date);
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const note = tip.note ? `<div class="tip-note">${escapeHtml(tip.note)}</div>` : '';
+    return `
+      <div class="tip-card">
+        <div class="tip-card-header">
+          <div class="tip-name">${escapeHtml(tip.name)}</div>
+          <div class="tip-date">${dateStr}</div>
+        </div>
+        <div class="tip-card-body">
+          <div class="tip-row">
+            <span class="tip-label">Company</span>
+            <span class="tip-value">${escapeHtml(tip.company)}</span>
+          </div>
+          <div class="tip-row">
+            <span class="tip-label">Code</span>
+            <span class="tip-value code">${escapeHtml(tip.code)}</span>
+          </div>
+          ${note}
+        </div>
+        <div class="tip-card-footer">
+          <button class="btn btn-sea-outline btn-sm" onclick="downloadPoster('${id}')">Download Poster</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div'); div.textContent = text; return div.innerHTML;
+  }
+
+  function findTipById(id) {
+    return tips.find(t => t.id === id);
+  }
+
+  function downloadPoster(id) {
+    const tip = findTipById(id);
+    if (!tip) return;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const w = 800, h = 1000; canvas.width = w; canvas.height = h;
+    const pad = 40;
+    const d = new Date(tip.date);
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#006994'); grad.addColorStop(0.5, '#0088b0'); grad.addColorStop(1, '#00557a');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.beginPath(); ctx.arc(100, 100, 200, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(700, 900, 250, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(400, 500, 350, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 14px Inter, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('JOTIPS', pad, 70);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '14px Inter, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(dateStr, w - pad, 70);
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, 90); ctx.lineTo(w - pad, 90); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+    ctx.font = 'bold 36px Inter, sans-serif';
+    const nameLines = wrapText(ctx, tip.name, w - pad * 2, 36); let y = 180;
+    for (const line of nameLines) { ctx.fillText(line, w / 2, y); y += 44; }
+    y = Math.max(y + 20, 260);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    roundRect(ctx, w / 2 - 100, y - 26, 200, 36, 18); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = 'bold 13px Inter, sans-serif';
+    ctx.fillText('BETTING TIP', w / 2, y - 2); y += 40;
+    const cardX = pad + 20, cardW = w - pad * 2 - 40, cardY = y, cardH = 180;
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    roundRect(ctx, cardX, cardY, cardW, cardH, 16); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('BETTING COMPANY', cardX + 30, cardY + 35);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.fillText(tip.company, cardX + 30, cardY + 65);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Inter, sans-serif';
+    ctx.fillText('BETTING CODE', cardX + 30, cardY + 105);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 32px "Courier New", monospace';
+    ctx.fillText(tip.code, cardX + 30, cardY + 145);
+    let noteY = cardY + cardH + 30;
+    if (tip.note) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('NOTE', cardX, noteY); noteY += 22;
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '15px Inter, sans-serif';
+      for (const line of wrapText(ctx, tip.note, cardW, 15)) { ctx.fillText(line, cardX, noteY); noteY += 22; }
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('JOTIPS — Betting Tips & Predictions', w / 2, h - 30);
+    const link = document.createElement('a');
+    link.download = `jotips-${tip.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}.png`;
+    link.href = canvas.toDataURL('image/png'); link.click();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+  }
+
+  function wrapText(ctx, text, maxWidth) {
+    const words = text.split(' '); const lines = []; let current = '';
+    for (const word of words) {
+      const test = current ? current + ' ' + word : word;
+      if (ctx.measureText(test).width > maxWidth && current) { lines.push(current); current = word; }
+      else { current = test; }
+    }
+    if (current) lines.push(current);
+    return lines.length ? lines : [text];
+  }
+
+  loadTips();
+</script>
+</body>
+</html>

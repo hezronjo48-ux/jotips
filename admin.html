@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JOTIPS Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sea-blue: #006994; --sea-light: #0088b0; --sea-dark: #004b6b;
+      --sea-gradient: linear-gradient(135deg, #006994, #0088b0);
+      --white: #ffffff; --gray-50: #f8fafc; --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0; --gray-300: #cbd5e1; --gray-400: #94a3b8;
+      --gray-500: #64748b; --gray-700: #334155; --gray-900: #0f172a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+      --radius: 12px; --radius-sm: 8px;
+    }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+    .header { background: var(--sea-gradient); color: white; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+    .logo span { color: rgba(255,255,255,0.7); font-weight: 400; font-size: 14px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .server-status { font-size: 12px; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+    .server-status.online { background: #dcfce7; color: #166534; }
+    .server-status.offline { background: #fef2f2; color: #991b1b; }
+
+    .btn { padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-white { background: white; color: var(--sea-blue); } .btn-white:hover { background: var(--gray-100); }
+    .btn-outline-white { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.5); } .btn-outline-white:hover { border-color: white; background: rgba(255,255,255,0.1); }
+    .btn-sea { background: var(--sea-gradient); color: white; } .btn-sea:hover { box-shadow: var(--shadow-md); }
+    .btn-sea-outline { background: transparent; color: var(--sea-blue); border: 2px solid var(--sea-blue); } .btn-sea-outline:hover { background: var(--sea-blue); color: white; }
+    .btn-danger { background: #ef4444; color: white; } .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: var(--radius); padding: 32px; width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); text-align: center; }
+    .modal h2 { font-size: 20px; margin-bottom: 8px; color: var(--sea-dark); }
+    .modal p { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; }
+    .modal input { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-200); border-radius: var(--radius-sm); font-family: inherit; font-size: 16px; outline: none; margin-bottom: 16px; }
+    .modal input:focus { border-color: var(--sea-blue); }
+    .modal .btn { width: 100%; justify-content: center; padding: 12px; font-size: 16px; }
+    .modal-error { color: #ef4444; font-size: 13px; margin-top: -12px; margin-bottom: 12px; display: none; }
+
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .section-title { font-size: 20px; font-weight: 800; color: var(--sea-dark); }
+
+    .tip-form { background: white; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 32px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { text-align: left; } .form-group.full { grid-column: 1 / -1; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px 14px; border: 2px solid var(--gray-200); border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; outline: none; background: var(--gray-50); }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--sea-blue); background: white; }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .tip-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform 0.2s; }
+    .tip-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .tip-card-header { background: var(--sea-gradient); color: white; padding: 16px 20px; }
+    .tip-card-header .tip-name { font-size: 17px; font-weight: 700; line-height: 1.3; }
+    .tip-card-header .tip-date { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+    .tip-card-body { padding: 16px 20px; }
+    .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+    .tip-row:last-child { border-bottom: none; }
+    .tip-label { font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.3px; }
+    .tip-value { font-size: 14px; font-weight: 600; color: var(--gray-900); text-align: right; word-break: break-all; }
+    .tip-value.code { font-family: monospace; font-size: 16px; color: var(--sea-dark); font-weight: 800; }
+    .tip-note { margin-top: 12px; padding: 10px 12px; background: var(--gray-50); border-radius: var(--radius-sm); font-size: 13px; color: var(--gray-700); line-height: 1.5; }
+    .tip-card-footer { padding: 10px 20px; border-top: 1px solid var(--gray-100); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--gray-500); }
+    .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--gray-700); }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gray-900); color: white; padding: 12px 24px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; transition: all 0.3s; z-index: 300; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .header { padding: 12px 16px; }
+      .logo { font-size: 18px; } .logo span { font-size: 12px; }
+      .section-title { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">JOTIPS <span>admin panel</span></div>
+    <span id="serverStatus" class="server-status offline">Offline</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-white" id="logoutBtn" onclick="logout()" style="display:none">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Password Modal -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal">
+      <h2>Admin Access</h2>
+      <p>Enter admin password to manage tips</p>
+      <input type="password" id="passwordInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPassword()">
+      <div class="modal-error" id="passwordError">Wrong password</div>
+      <button class="btn btn-sea" onclick="checkPassword()">Enter</button>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="section-header">
+      <div class="section-title">Post a Tip</div>
+    </div>
+
+    <form class="tip-form" id="tipForm" onsubmit="saveTip(event)">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Name of the Tip</label>
+          <input type="text" id="tipName" placeholder="e.g. Manchester City vs Liverpool" required>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="tipDate" required>
+        </div>
+        <div class="form-group">
+          <label>Betting Company</label>
+          <input type="text" id="tipCompany" placeholder="e.g. Bet9ja, SportyBet" required>
+        </div>
+        <div class="form-group full">
+          <label>Betting Code</label>
+          <input type="text" id="tipCode" placeholder="e.g. 1X2-12345-ABCDE" required>
+        </div>
+        <div class="form-group full">
+          <label>Note</label>
+          <textarea id="tipNote" placeholder="Optional note or prediction details..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-sea-outline" onclick="resetForm()">Clear</button>
+        <button type="submit" class="btn btn-sea" id="submitBtn">Post Tip</button>
+      </div>
+    </form>
+
+    <div class="section-header">
+      <div class="section-title">All Tips</div>
+      <span id="tipCount" style="font-size:14px;color:var(--gray-500)">0 tips</span>
+    </div>
+    <div id="adminTipsList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_BASE = '/api/tips';
+  let tips = [];
+  let adminToken = '';
+
+  function getServerUrl() {
+    return window.location.origin + API_BASE;
+  }
+
+  async function fetchTips() {
+    setServerStatus('offline', '...');
+    try {
+      const res = await fetch(getServerUrl());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      tips = await res.json();
+      setServerStatus('online', 'Live');
+      renderAll();
+    } catch(e) {
+      setServerStatus('offline', 'Offline');
+      document.getElementById('adminTipsList').innerHTML =
+        '<div class="empty-state"><h3>Server offline</h3><p>Make sure your server is running</p></div>';
+    }
+  }
+
+  async function postTip(data) {
+    const res = await fetch(getServerUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      if (res.status === 401) { showToast('Session expired. Re-login.'); logout(); return null; }
+      throw new Error('HTTP ' + res.status);
+    }
+    return res.json();
+  }
+
+  async function deleteTipOnServer(id) {
+    const res = await fetch(`${getServerUrl()}/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (!res.ok) {
+      if (res.status === 401) { showToast('Session expired. Re-login.'); logout(); return false; }
+      throw new Error('HTTP ' + res.status);
+    }
+    return true;
+  }
+
+  function setServerStatus(state, label) {
+    const el = document.getElementById('serverStatus');
+    el.className = 'server-status ' + state;
+    el.textContent = label;
+  }
+
+  function checkPassword() {
+    adminToken = document.getElementById('passwordInput').value;
+    if (!adminToken) return;
+    // Verify by trying to fetch tips with the token
+    login();
+  }
+
+  function login() {
+    document.getElementById('passwordModal').classList.remove('active');
+    document.getElementById('adminPanel').classList.add('active');
+    document.getElementById('logoutBtn').style.display = 'inline-flex';
+    document.getElementById('tipDate').value = new Date().toISOString().split('T')[0];
+    fetchTips();
+  }
+
+  function logout() {
+    adminToken = '';
+    document.getElementById('adminPanel').classList.remove('active');
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('passwordModal').classList.add('active');
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordError').style.display = 'none';
+  }
+
+  function renderAll() {
+    renderTipsList();
+    document.getElementById('tipCount').textContent = tips.length + ' tip' + (tips.length !== 1 ? 's' : '');
+  }
+
+  function renderTipsList() {
+    const container = document.getElementById('adminTipsList');
+    if (tips.length === 0) {
+      container.innerHTML = '<div class="empty-state"><h3>No tips yet</h3><p>Post your first betting tip above</p></div>';
+      return;
+    }
+    let html = '<div class="tips-grid">';
+    for (let i = 0; i < tips.length; i++) {
+      html += tipCardHTML(tips[i], tips[i].id);
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function tipCardHTML(tip, id) {
+    const d = new Date(tip.date);
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const note = tip.note ? `<div class="tip-note">${escapeHtml(tip.note)}</div>` : '';
+    return `
+      <div class="tip-card">
+        <div class="tip-card-header">
+          <div class="tip-name">${escapeHtml(tip.name)}</div>
+          <div class="tip-date">${dateStr}</div>
+        </div>
+        <div class="tip-card-body">
+          <div class="tip-row">
+            <span class="tip-label">Company</span>
+            <span class="tip-value">${escapeHtml(tip.company)}</span>
+          </div>
+          <div class="tip-row">
+            <span class="tip-label">Code</span>
+            <span class="tip-value code">${escapeHtml(tip.code)}</span>
+          </div>
+          ${note}
+        </div>
+        <div class="tip-card-footer">
+          <button class="btn btn-sm btn-sea-outline" onclick="downloadPoster('${id}')">Poster</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteTip('${id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  async function saveTip(e) {
+    e.preventDefault();
+    const name = document.getElementById('tipName').value.trim();
+    const date = document.getElementById('tipDate').value;
+    const company = document.getElementById('tipCompany').value.trim();
+    const code = document.getElementById('tipCode').value.trim();
+    const note = document.getElementById('tipNote').value.trim();
+    if (!name || !date || !company || !code) { showToast('Fill all required fields'); return; }
+
+    const result = await postTip({ name, date, company, code, note });
+    if (result) {
+      resetForm();
+      await fetchTips();
+      showToast('Tip posted!');
+    }
+  }
+
+  async function deleteTip(id) {
+    if (!confirm('Delete this tip?')) return;
+    const ok = await deleteTipOnServer(id);
+    if (ok) {
+      await fetchTips();
+      showToast('Tip deleted');
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('tipForm').reset();
+    document.getElementById('submitBtn').textContent = 'Post Tip';
+    document.getElementById('tipDate').value = new Date().toISOString().split('T')[0];
+  }
+
+  function findTipById(id) {
+    return tips.find(t => t.id === id);
+  }
+
+  function downloadPoster(id) {
+    const tip = findTipById(id);
+    if (!tip) return;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const w = 800, h = 1000; canvas.width = w; canvas.height = h;
+    const pad = 40;
+    const d = new Date(tip.date);
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#006994'); grad.addColorStop(0.5, '#0088b0'); grad.addColorStop(1, '#00557a');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.beginPath(); ctx.arc(100, 100, 200, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(700, 900, 250, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(400, 500, 350, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'bold 14px Inter, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('JOTIPS', pad, 70);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '14px Inter, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(dateStr, w - pad, 70);
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, 90); ctx.lineTo(w - pad, 90); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+    ctx.font = 'bold 36px Inter, sans-serif';
+    const nameLines = wrapText(ctx, tip.name, w - pad * 2, 36); let y = 180;
+    for (const line of nameLines) { ctx.fillText(line, w / 2, y); y += 44; }
+    y = Math.max(y + 20, 260);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    roundRect(ctx, w / 2 - 100, y - 26, 200, 36, 18); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = 'bold 13px Inter, sans-serif';
+    ctx.fillText('BETTING TIP', w / 2, y - 2); y += 40;
+    const cardX = pad + 20, cardW = w - pad * 2 - 40, cardY = y, cardH = 180;
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    roundRect(ctx, cardX, cardY, cardW, cardH, 16); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('BETTING COMPANY', cardX + 30, cardY + 35);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.fillText(tip.company, cardX + 30, cardY + 65);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Inter, sans-serif';
+    ctx.fillText('BETTING CODE', cardX + 30, cardY + 105);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 32px "Courier New", monospace';
+    ctx.fillText(tip.code, cardX + 30, cardY + 145);
+    let noteY = cardY + cardH + 30;
+    if (tip.note) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px Inter, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('NOTE', cardX, noteY); noteY += 22;
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '15px Inter, sans-serif';
+      for (const line of wrapText(ctx, tip.note, cardW, 15)) { ctx.fillText(line, cardX, noteY); noteY += 22; }
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('JOTIPS — Betting Tips & Predictions', w / 2, h - 30);
+    const link = document.createElement('a');
+    link.download = `jotips-${tip.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}.png`;
+    link.href = canvas.toDataURL('image/png'); link.click();
+    showToast('Poster downloaded!');
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+  }
+
+  function wrapText(ctx, text, maxWidth) {
+    const words = text.split(' '); const lines = []; let current = '';
+    for (const word of words) {
+      const test = current ? current + ' ' + word : word;
+      if (ctx.measureText(test).width > maxWidth && current) { lines.push(current); current = word; }
+      else { current = test; }
+    }
+    if (current) lines.push(current);
+    return lines.length ? lines : [text];
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show');
+    clearTimeout(window._toast); window._toast = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // Init
+  document.getElementById('passwordModal').classList.add('active');
+  document.getElementById('passwordInput').focus();
+  document.getElementById('passwordModal').addEventListener('click', function(e) {
+    if (e.target === this) logout();
+  });
+</script>
+</body>
+</html>
