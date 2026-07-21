@@ -129,6 +129,22 @@
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px) scale(.9); background: var(--800); color: #fff; padding: 12px 24px; border-radius: var(--rs); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); z-index: 300; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 
+    /* Slideshow */
+    .slider-wrap { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; overflow: hidden; border-radius: 0 0 var(--r) var(--r); }
+    .slider { position: relative; width: 100%; aspect-ratio: 2.5 / 1; background: var(--100); overflow: hidden; }
+    .slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s ease; }
+    .slider img.active { opacity: 1; }
+    .slider-dots { display: flex; justify-content: center; gap: 8px; padding: 10px; position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,.4)); }
+    .slider-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: var(--tr); }
+    .slider-dots span.active { background: #fff; transform: scale(1.3); }
+    .slider-empty { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: var(--400); font-size: 14px; background: var(--100); }
+
+    /* Lightbox */
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 500; align-items: center; justify-content: center; cursor: pointer; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90%; max-height: 90%; border-radius: 8px; }
+    .lightbox .close-lb { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 32px; cursor: pointer; background: none; border: none; }
+
     .back-top { position: fixed; bottom: 30px; right: 24px; width: 44px; height: 44px; border-radius: 50%; background: var(--grad); color: #fff; border: none; cursor: pointer; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(20px); transition: var(--tr); z-index: 99; font-size: 18px; }
     .back-top.visible { opacity: 1; transform: translateY(0); }
     .back-top:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl); }
@@ -163,6 +179,19 @@
 <div class="hero">
   <h1>Latest <span>Betting Tips</span></h1>
   <p>Free predictions & betting codes</p>
+</div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slider-empty" id="sliderEmpty">No images yet</div>
+  </div>
+  <div class="slider-dots" id="sliderDots"></div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="close-lb">&times;</button>
+  <img id="lbImg" src="" alt="">
 </div>
 
 <div class="container">
@@ -406,7 +435,62 @@
     clearTimeout(window._t); window._t = setTimeout(() => e.classList.remove('show'), 2500);
   }
 
+  // Slideshow
+  let slideIndex = 0, slideTimer = null;
+  async function loadSlider() {
+    try {
+      const r = await fetch(window.location.origin + '/api/images');
+      if (!r.ok) throw Error();
+      const files = await r.json();
+      const slider = document.getElementById('slider');
+      const dots = document.getElementById('sliderDots');
+      const empty = document.getElementById('sliderEmpty');
+      if (!files.length) { slider.innerHTML = '<div class="slider-empty">No images yet</div>'; dots.innerHTML = ''; return; }
+      slider.innerHTML = files.map((f, i) => `<img src="/uploads/${f}" class="${i === 0 ? 'active' : ''}" onclick="openLightbox('/uploads/${f}')" alt="">`).join('');
+      dots.innerHTML = files.map((f, i) => `<span class="${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></span>`).join('');
+      slideIndex = 0;
+      startSlideShow();
+    } catch(e) {}
+  }
+
+  function startSlideShow() {
+    clearInterval(slideTimer);
+    slideTimer = setInterval(() => {
+      const imgs = document.querySelectorAll('.slider img');
+      const dots = document.querySelectorAll('.slider-dots span');
+      if (!imgs.length) return;
+      imgs.forEach(i => i.classList.remove('active'));
+      dots.forEach(d => d.classList.remove('active'));
+      slideIndex = (slideIndex + 1) % imgs.length;
+      imgs[slideIndex].classList.add('active');
+      if (dots[slideIndex]) dots[slideIndex].classList.add('active');
+    }, 4000);
+  }
+
+  function goToSlide(n) {
+    clearInterval(slideTimer);
+    const imgs = document.querySelectorAll('.slider img');
+    const dots = document.querySelectorAll('.slider-dots span');
+    if (!imgs.length) return;
+    imgs.forEach(i => i.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    slideIndex = n;
+    imgs[slideIndex].classList.add('active');
+    if (dots[slideIndex]) dots[slideIndex].classList.add('active');
+    startSlideShow();
+  }
+
+  function openLightbox(src) {
+    document.getElementById('lbImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+
   loadTips();
+  loadSlider();
 </script>
 </body>
 </html>

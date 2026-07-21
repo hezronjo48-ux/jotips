@@ -141,6 +141,18 @@
     .empty-state h3 { font-size: 18px; margin-bottom: 6px; color: var(--700); }
     .empty-state p { font-size: 14px; color: var(--400); margin-bottom: 16px; }
 
+    /* Image Gallery */
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
+    .gallery-item { position: relative; border-radius: var(--rs); overflow: hidden; aspect-ratio: 16/9; background: var(--100); box-shadow: var(--shadow); transition: var(--tr); }
+    .gallery-item:hover { box-shadow: var(--shadow-md); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-item .del-img { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.6); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--tr); }
+    .gallery-item:hover .del-img { opacity: 1; }
+    .gallery-item .del-img:hover { background: #ef4444; }
+    .upload-area { border: 2px dashed var(--300); border-radius: var(--rs); padding: 24px; text-align: center; cursor: pointer; transition: var(--tr); margin-top: 12px; }
+    .upload-area:hover { border-color: var(--sea); background: var(--50); }
+    .upload-area .icon { font-size: 32px; } .upload-area p { font-size: 13px; color: var(--400); margin-top: 4px; }
+
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px) scale(.9); background: var(--800); color: #fff; padding: 12px 24px; border-radius: var(--rs); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); z-index: 300; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     .toast.success { background: #166534; } .toast.error { background: #991b1b; }
@@ -243,6 +255,19 @@
       <div class="section-title">📋 All Tips <span class="tip-count" id="tipCount">0</span></div>
     </div>
     <div id="adminTipsList"></div>
+
+    <div style="margin-top:40px">
+      <div class="section-header">
+        <div class="section-title">🖼 Image Gallery</div>
+      </div>
+      <p style="font-size:13px;color:var(--400);margin-bottom:8px">Images appear as an auto-slideshow on the public page.</p>
+      <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+        <div class="icon">📤</div>
+        <p>Click to upload images (JPG, PNG, GIF, WebP — max 5MB)</p>
+        <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="uploadImages(this.files)">
+      </div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
   </div>
 </div>
 
@@ -507,6 +532,67 @@
     for (const w of ws) { const test = cur ? cur + ' ' + w : w; if (x.measureText(test).width > mw && cur) { ls.push(cur); cur = w; } else { cur = test; } }
     if (cur) ls.push(cur); return ls.length ? ls : [t];
   }
+
+  // Image Gallery
+  async function loadGallery() {
+    try {
+      const r = await fetch(window.location.origin + '/api/images');
+      if (!r.ok) throw Error();
+      const files = await r.json();
+      const grid = document.getElementById('galleryGrid');
+      if (!files.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--400);padding:20px">No images uploaded yet</p>'; return; }
+      grid.innerHTML = files.map(f => `
+        <div class="gallery-item">
+          <img src="/uploads/${f}" alt="" onclick="window.open('/uploads/${f}','_blank')">
+          <button class="del-img" onclick="deleteImage('${f}')">✕</button>
+        </div>
+      `).join('');
+    } catch(e) { document.getElementById('galleryGrid').innerHTML = '<p style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--400)">Failed to load</p>'; }
+  }
+
+  async function uploadImages(files) {
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) { showToast(file.name + ' is too large (max 5MB)', 'error'); continue; }
+      const fd = new FormData();
+      fd.append('image', file);
+      try {
+        const r = await fetch(window.location.origin + '/api/images', {
+          method: 'POST',
+          headers: { 'x-admin-token': adminToken },
+          body: fd
+        });
+        if (!r.ok) throw Error();
+        showToast(file.name + ' uploaded!', 'success');
+      } catch(e) { showToast('Failed to upload ' + file.name, 'error'); }
+    }
+    loadGallery();
+  }
+
+  async function deleteImage(filename) {
+    document.getElementById('confirmTitle').textContent = 'Delete this image?';
+    document.getElementById('confirmMsg').textContent = '"' + filename + '" will be removed from the slideshow.';
+    document.getElementById('confirmOk').textContent = 'Delete';
+    document.getElementById('confirmOk').className = 'btn btn-danger';
+    confirmCallback = async () => {
+      try {
+        const r = await fetch(window.location.origin + '/api/images/' + filename, {
+          method: 'DELETE',
+          headers: { 'x-admin-token': adminToken }
+        });
+        if (!r.ok) throw Error();
+        showToast('Image deleted', 'success');
+        loadGallery();
+      } catch(e) { showToast('Failed to delete', 'error'); }
+      closeConfirm();
+    };
+    document.getElementById('confirmModal').classList.add('active');
+  }
+
+  // Load gallery on login
+  const origLogin = login;
+  login = function() { origLogin(); loadGallery(); };
+  const origFetchTips = fetchTips;
+  fetchTips = function() { origFetchTips(); if (adminToken) loadGallery(); };
 
   function showToast(m, type) {
     const e = document.getElementById('toast'); e.textContent = m;
