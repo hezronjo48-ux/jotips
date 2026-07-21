@@ -1,9 +1,11 @@
+process.on('uncaughtException', e => { console.error('FATAL:', e.message, e.stack); process.exit(1); });
+process.on('unhandledRejection', e => { console.error('FATAL REJECTION:', e.message); });
+
 require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const { exec } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,17 +15,12 @@ const DATA_FILE = path.join(__dirname, 'tips.json');
 const COMMENTS_FILE = path.join(__dirname, 'comments.json');
 const ANALYTICS_FILE = path.join(__dirname, 'analytics.json');
 
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+} catch (e) { console.error('Uploads dir error:', e.message); }
 
-// Extract GitHub token from git remote URL
-let GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-if (!GITHUB_TOKEN) {
-  try {
-    const remotes = require('child_process').execSync('git remote -v', { encoding: 'utf-8', cwd: __dirname });
-    const m = remotes.match(/https:\/\/[^:]+:([^@]+)@github\.com/);
-    if (m) GITHUB_TOKEN = m[1];
-  } catch (e) {}
-}
+// GitHub token from env
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 
 // Multer
 const storage = multer.diskStorage({
@@ -47,19 +44,18 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 
 // GitHub sync
 let syncTimer = null;
-const SYNC_USER = 'jotips-bot';
-const SYNC_EMAIL = 'jotips@bot.com';
 
 function syncGitHub() {
   if (!GITHUB_TOKEN) return;
   if (syncTimer) clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
-    const remoteUrl = `https://hezronjo48-ux:${GITHUB_TOKEN}@github.com/hezronjo48-ux/jotips.git`;
-    exec(`git add -A && git -c user.name="${SYNC_USER}" -c user.email="${SYNC_EMAIL}" commit -m "Auto-sync data" && git push "${remoteUrl}" master`, {
+    const { exec } = require('child_process');
+    const remoteUrl = 'https://hezronjo48-ux:' + GITHUB_TOKEN + '@github.com/hezronjo48-ux/jotips.git';
+    exec('git add -A && git -c user.name="jotips-bot" -c user.email="jotips@bot.com" commit --allow-empty -m "Auto-sync data" && git push "' + remoteUrl + '" master', {
       cwd: __dirname, timeout: 15000,
-    }, (err, stdout, stderr) => {
+    }, (err) => {
       if (err) {
-        if (err.message.includes('nothing to commit')) return;
+        if (err.message.indexOf('nothing to commit') >= 0) return;
         console.error('Git sync error:', err.message.slice(0, 200));
       } else console.log('Git sync OK');
     });
@@ -71,19 +67,19 @@ function loadTips() {
   try { if (fs.existsSync(DATA_FILE)) return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')); } catch (e) {}
   return [];
 }
-function saveTips(data, sync) { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (sync !== false) syncGitHub(); }
+function saveTips(data, s) { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
 
 function loadComments() {
   try { if (fs.existsSync(COMMENTS_FILE)) return JSON.parse(fs.readFileSync(COMMENTS_FILE, 'utf-8')); } catch (e) {}
   return [];
 }
-function saveComments(data, sync) { fs.writeFileSync(COMMENTS_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (sync !== false) syncGitHub(); }
+function saveComments(data, s) { fs.writeFileSync(COMMENTS_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
 
 function loadAnalytics() {
   try { if (fs.existsSync(ANALYTICS_FILE)) return JSON.parse(fs.readFileSync(ANALYTICS_FILE, 'utf-8')); } catch (e) {}
   return { views: 0, tipViews: {} };
 }
-function saveAnalytics(a, sync) { fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(a, null, 2), 'utf-8'); if (sync !== false) syncGitHub(); }
+function saveAnalytics(a, s) { fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(a, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
 
 function loadImages() {
   try { return fs.readdirSync(UPLOADS_DIR).filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f)).sort().reverse(); }
@@ -184,9 +180,11 @@ app.post('/api/analytics/tip-view/:id', (req, res) => {
   res.json({ success: true });
 });
 
-// Init
-if (!fs.existsSync(DATA_FILE)) saveTips([], false);
-if (!fs.existsSync(COMMENTS_FILE)) saveComments([], false);
-if (!fs.existsSync(ANALYTICS_FILE)) saveAnalytics({ views: 0, tipViews: {} }, false);
+// Init data files
+try {
+  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
+  if (!fs.existsSync(COMMENTS_FILE)) fs.writeFileSync(COMMENTS_FILE, '[]', 'utf-8');
+  if (!fs.existsSync(ANALYTICS_FILE)) fs.writeFileSync(ANALYTICS_FILE, '{"views":0,"tipViews":{}}', 'utf-8');
+} catch (e) { console.error('Init error:', e.message); }
 
-app.listen(PORT, () => console.log(`JOTIPS server on port ${PORT} [GitHub sync: ${!!GITHUB_TOKEN}]`));
+app.listen(PORT, () => console.log('JOTIPS server on port ' + PORT + ' [GitHub sync: ' + !!GITHUB_TOKEN + ']'));
