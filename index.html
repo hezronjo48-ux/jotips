@@ -257,19 +257,19 @@
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">🏢 Company</span><span class="tip-value">${esc(t.company)}</span></div>
         ${od}
-        <div class="tip-row"><span class="tip-label">🔑 Code</span><div class="code-wrap"><span class="tip-value code">${esc(t.code)}</span><button class="copy-btn" onclick="copyCode('${esc(t.code)}',this)" title="Copy code">📋</button></div></div>
+        <div class="tip-row"><span class="tip-label">🔑 Code</span><div class="code-wrap"><span class="tip-value code">${esc(t.code)}</span><button class="copy-btn" onclick="copyCode('${esc(t.code)}',this,'${id}')" title="Copy code">📋</button></div></div>
         ${n}
         <div class="comments-section">
           <button class="comments-toggle" onclick="toggleComments('${id}', this)">💬 <span id="cc-${id}">0</span> comments</button>
           <div class="comments-list" id="cl-${id}">
             <div class="no-comments">Loading...</div>
           </div>
-          <div class="comment-form">
+            <div class="comment-form">
             <div class="row">
               <input type="text" id="ca-${id}" placeholder="Your name" maxlength="30">
               <button class="btn btn-sea btn-xs" onclick="submitComment('${id}')">Send</button>
             </div>
-            <textarea id="ct-${id}" placeholder="Write a comment..." maxlength="500" rows="2" style="display:none" id="cta-${id}"></textarea>
+            <textarea id="ct-${id}" placeholder="Write a comment..." maxlength="500" rows="2"></textarea>
           </div>
         </div>
       </div>
@@ -283,10 +283,11 @@
 
   function findTip(id) { return tips.find(t => t.id === id); }
 
-  function copyCode(code, btn) {
+  function copyCode(code, btn, tipId) {
     navigator.clipboard.writeText(code).then(() => {
       btn.textContent = '✓'; btn.classList.add('copied');
       setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
+      if (tipId) fetch(window.location.origin + '/api/analytics/tip-view/' + tipId, { method: 'POST' }).catch(() => {});
     }).catch(() => showToast('Could not copy'));
   }
 
@@ -446,7 +447,8 @@
       const dots = document.getElementById('sliderDots');
       const empty = document.getElementById('sliderEmpty');
       if (!files.length) { slider.innerHTML = '<div class="slider-empty">No images yet</div>'; dots.innerHTML = ''; return; }
-      slider.innerHTML = files.map((f, i) => `<img src="/uploads/${f}" class="${i === 0 ? 'active' : ''}" onclick="openLightbox('/uploads/${f}')" alt="">`).join('');
+      slider.innerHTML = files.map((f, i) => `<img src="/uploads/${f}" class="${i === 0 ? 'active' : ''}" alt="">`).join('');
+      slider.onclick = function() { const img = this.querySelector('.active'); if (img) openLightbox(img.src); };
       dots.innerHTML = files.map((f, i) => `<span class="${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></span>`).join('');
       slideIndex = 0;
       startSlideShow();
@@ -488,6 +490,15 @@
   function closeLightbox() {
     document.getElementById('lightbox').classList.remove('open');
   }
+
+  // Track view
+  fetch(window.location.origin + '/api/analytics/view', { method: 'POST' }).catch(() => {});
+
+  // Show view count
+  fetch(window.location.origin + '/api/analytics').then(r => r.json()).then(a => {
+    const footer = document.querySelector('.footer');
+    if (a.views > 0) footer.innerHTML += '<br><span style="font-size:11px;opacity:.6">👁 ' + a.views + ' views</span>';
+  }).catch(() => {});
 
   loadTips();
   loadSlider();

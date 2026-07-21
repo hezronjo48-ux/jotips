@@ -268,6 +268,34 @@
       </div>
       <div class="gallery-grid" id="galleryGrid"></div>
     </div>
+
+    <div style="margin-top:40px">
+      <div class="section-header">
+        <div class="section-title">📊 Analytics</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px" id="analyticsGrid">
+        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statViews">-</div>
+          <div style="font-size:12px;color:var(--400);margin-top:4px">Page Views</div>
+        </div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statTips">-</div>
+          <div style="font-size:12px;color:var(--400);margin-top:4px">Tips Posted</div>
+        </div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statComments">-</div>
+          <div style="font-size:12px;color:var(--400);margin-top:4px">Comments</div>
+        </div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statImages">-</div>
+          <div style="font-size:12px;color:var(--400);margin-top:4px">Images</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;background:var(--100);border-radius:var(--rs);padding:16px;border:1px solid var(--200)">
+        <div style="font-size:13px;font-weight:600;color:var(--700);margin-bottom:8px">🔥 Most Used Tips</div>
+        <div id="topTips" style="font-size:13px;color:var(--500)">Loading...</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -588,11 +616,43 @@
     document.getElementById('confirmModal').classList.add('active');
   }
 
-  // Load gallery on login
+  // Analytics
+  async function loadAnalytics() {
+    try {
+      const r = await fetch(window.location.origin + '/api/analytics');
+      if (!r.ok) throw Error();
+      const a = await r.json();
+      document.getElementById('statViews').textContent = a.views || 0;
+      document.getElementById('statTips').textContent = tips.length;
+      document.getElementById('statComments').textContent = '...';
+      document.getElementById('statImages').textContent = document.querySelectorAll('#galleryGrid .gallery-item').length || 0;
+      // Most used tips
+      if (a.tipViews && Object.keys(a.tipViews).length) {
+        const sorted = Object.entries(a.tipViews).sort((a,b) => b[1] - a[1]).slice(0, 5);
+        const html = sorted.map(([id, count]) => {
+          const tip = tips.find(t => t.id === id);
+          const name = tip ? tip.name : id.slice(0, 12);
+          return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--200)"><span>${esc(name)}</span><span style="color:var(--sea-light);font-weight:700">${count} uses</span></div>`;
+        }).join('');
+        document.getElementById('topTips').innerHTML = html || '<div style="color:var(--400)">No tip usage data yet</div>';
+      } else {
+        document.getElementById('topTips').innerHTML = '<div style="color:var(--400)">No tip usage data yet</div>';
+      }
+      // Comment count
+      try {
+        const c = await fetch(window.location.origin + '/api/comments/all');
+        if (c.ok) { const all = await c.json(); document.getElementById('statComments').textContent = all.length; }
+      } catch(e) {}
+    } catch(e) { document.getElementById('topTips').innerHTML = 'Could not load'; }
+  }
+
+  function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+
+  // Load gallery & analytics on login
   const origLogin = login;
-  login = function() { origLogin(); loadGallery(); };
+  login = function() { origLogin(); loadGallery(); loadAnalytics(); };
   const origFetchTips = fetchTips;
-  fetchTips = function() { origFetchTips(); if (adminToken) loadGallery(); };
+  fetchTips = function() { origFetchTips(); if (adminToken) { loadGallery(); loadAnalytics(); } };
 
   function showToast(m, type) {
     const e = document.getElementById('toast'); e.textContent = m;

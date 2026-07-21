@@ -94,6 +94,8 @@ app.delete('/api/tips/:id', adminAuth, (req, res) => {
 });
 
 // Comments
+app.get('/api/comments/all', adminAuth, (req, res) => { res.json(loadComments()); });
+
 app.get('/api/comments/:tipId', (req, res) => {
   res.json(loadComments().filter(c => c.tipId === req.params.id).reverse());
 });
@@ -139,7 +141,30 @@ app.delete('/api/images/:filename', adminAuth, (req, res) => {
   }
 });
 
+// Analytics
+const ANALYTICS_FILE = path.join(__dirname, 'analytics.json');
+
+function loadAnalytics() {
+  try { if (fs.existsSync(ANALYTICS_FILE)) return JSON.parse(fs.readFileSync(ANALYTICS_FILE, 'utf-8')); }
+  catch (e) {} return { views: 0, tipViews: {} };
+}
+function saveAnalytics(a) { fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(a, null, 2), 'utf-8'); }
+
+app.get('/api/analytics', (req, res) => { res.json(loadAnalytics()); });
+
+app.post('/api/analytics/view', (req, res) => {
+  const a = loadAnalytics(); a.views = (a.views || 0) + 1; saveAnalytics(a);
+  res.json({ success: true, views: a.views });
+});
+
+app.post('/api/analytics/tip-view/:id', (req, res) => {
+  const a = loadAnalytics(); if (!a.tipViews) a.tipViews = {};
+  const id = req.params.id; a.tipViews[id] = (a.tipViews[id] || 0) + 1; saveAnalytics(a);
+  res.json({ success: true });
+});
+
 if (!fs.existsSync(DATA_FILE)) saveTips([]);
 if (!fs.existsSync(COMMENTS_FILE)) saveComments([]);
+if (!fs.existsSync(ANALYTICS_FILE)) saveAnalytics({ views: 0, tipViews: {} });
 
 app.listen(PORT, () => console.log(`JOTIPS server on port ${PORT}`));
