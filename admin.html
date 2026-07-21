@@ -271,6 +271,19 @@
 
     <div style="margin-top:40px">
       <div class="section-header">
+        <div class="section-title">🔗 Betting Links</div>
+      </div>
+      <p style="font-size:13px;color:var(--400);margin-bottom:8px">Add links to betting companies that will appear on the public page.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <input type="text" id="linkName" placeholder="Company name e.g. Bet9ja" style="flex:1;min-width:160px;padding:11px 15px;border:2px solid var(--200);border-radius:var(--rs);font-family:inherit;font-size:14px;outline:none;background:var(--50);color:var(--800)">
+        <input type="url" id="linkUrl" placeholder="URL e.g. https://bet9ja.com" style="flex:2;min-width:220px;padding:11px 15px;border:2px solid var(--200);border-radius:var(--rs);font-family:inherit;font-size:14px;outline:none;background:var(--50);color:var(--800)">
+        <button class="btn btn-sea" onclick="addLink()">➕ Add Link</button>
+      </div>
+      <div id="linksList" style="font-size:13px;color:var(--500)">Loading...</div>
+    </div>
+
+    <div style="margin-top:40px">
+      <div class="section-header">
         <div class="section-title">📊 Analytics</div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px" id="analyticsGrid">
@@ -616,6 +629,63 @@
     document.getElementById('confirmModal').classList.add('active');
   }
 
+  // Links
+  const LINKS_API = window.location.origin + '/api/links';
+
+  async function loadLinks() {
+    try {
+      const r = await fetch(LINKS_API);
+      if (!r.ok) throw Error();
+      const links = await r.json();
+      const el = document.getElementById('linksList');
+      if (!links.length) { el.innerHTML = '<span style="color:var(--400)">No links added yet</span>'; return; }
+      el.innerHTML = links.map(l => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--200);border-radius:var(--rs);margin-bottom:6px">
+          <div><strong style="color:var(--700)">${esc(l.name)}</strong> <span style="color:var(--400);font-size:12px">${esc(l.url)}</span></div>
+          <button class="btn btn-xs btn-danger" onclick="deleteLink('${l.id}')">✕</button>
+        </div>
+      `).join('');
+    } catch(e) { document.getElementById('linksList').innerHTML = '<span style="color:var(--400)">Failed to load</span>'; }
+  }
+
+  async function addLink() {
+    const name = document.getElementById('linkName').value.trim();
+    const url = document.getElementById('linkUrl').value.trim();
+    if (!name || !url) { showToast('Enter both name and URL', 'error'); return; }
+    try {
+      const r = await fetch(LINKS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify({ name, url })
+      });
+      if (!r.ok) throw Error();
+      document.getElementById('linkName').value = '';
+      document.getElementById('linkUrl').value = '';
+      showToast('Link added!', 'success');
+      loadLinks();
+    } catch(e) { showToast('Failed to add link', 'error'); }
+  }
+
+  async function deleteLink(id) {
+    document.getElementById('confirmTitle').textContent = 'Delete this link?';
+    document.getElementById('confirmMsg').textContent = 'The link will be removed from the public page.';
+    document.getElementById('confirmOk').textContent = 'Delete';
+    document.getElementById('confirmOk').className = 'btn btn-danger';
+    confirmCallback = async () => {
+      try {
+        const r = await fetch(LINKS_API + '/' + id, {
+          method: 'DELETE',
+          headers: { 'x-admin-token': adminToken }
+        });
+        if (!r.ok) throw Error();
+        showToast('Link deleted', 'success');
+        loadLinks();
+      } catch(e) { showToast('Failed to delete', 'error'); }
+      closeConfirm();
+    };
+    document.getElementById('confirmModal').classList.add('active');
+  }
+
   // Analytics
   async function loadAnalytics() {
     try {
@@ -650,9 +720,9 @@
 
   // Load gallery & analytics on login
   const origLogin = login;
-  login = function() { origLogin(); loadGallery(); loadAnalytics(); };
+  login = function() { origLogin(); loadGallery(); loadAnalytics(); loadLinks(); };
   const origFetchTips = fetchTips;
-  fetchTips = function() { origFetchTips(); if (adminToken) { loadGallery(); loadAnalytics(); } };
+  fetchTips = function() { origFetchTips(); if (adminToken) { loadGallery(); loadAnalytics(); loadLinks(); } };
 
   function showToast(m, type) {
     const e = document.getElementById('toast'); e.textContent = m;

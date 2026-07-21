@@ -14,6 +14,7 @@ const UPLOADS_DIR = path.join(__dirname, 'uploads');
 const DATA_FILE = path.join(__dirname, 'tips.json');
 const COMMENTS_FILE = path.join(__dirname, 'comments.json');
 const ANALYTICS_FILE = path.join(__dirname, 'analytics.json');
+const LINKS_FILE = path.join(__dirname, 'links.json');
 
 try {
   if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -80,6 +81,12 @@ function loadAnalytics() {
   return { views: 0, tipViews: {} };
 }
 function saveAnalytics(a, s) { fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(a, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
+
+function loadLinks() {
+  try { if (fs.existsSync(LINKS_FILE)) return JSON.parse(fs.readFileSync(LINKS_FILE, 'utf-8')); } catch (e) {}
+  return [];
+}
+function saveLinks(data, s) { fs.writeFileSync(LINKS_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
 
 function loadImages() {
   try { return fs.readdirSync(UPLOADS_DIR).filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f)).sort().reverse(); }
@@ -180,11 +187,36 @@ app.post('/api/analytics/tip-view/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// --- Links ---
+app.get('/api/links', (req, res) => { res.json(loadLinks().reverse()); });
+
+app.post('/api/links', adminAuth, (req, res) => {
+  const { name, url } = req.body;
+  if (!name || !url) return res.status(400).json({ error: 'Name and URL required' });
+  const link = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name: name.trim().slice(0, 50),
+    url: url.trim().slice(0, 500),
+    created: new Date().toISOString()
+  };
+  const l = loadLinks(); l.push(link); saveLinks(l);
+  res.json({ success: true, link });
+});
+
+app.delete('/api/links/:id', adminAuth, (req, res) => {
+  let links = loadLinks();
+  const idx = links.findIndex(l => l.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+  links.splice(idx, 1); saveLinks(links);
+  res.json({ success: true });
+});
+
 // Init data files
 try {
   if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
   if (!fs.existsSync(COMMENTS_FILE)) fs.writeFileSync(COMMENTS_FILE, '[]', 'utf-8');
   if (!fs.existsSync(ANALYTICS_FILE)) fs.writeFileSync(ANALYTICS_FILE, '{"views":0,"tipViews":{}}', 'utf-8');
+  if (!fs.existsSync(LINKS_FILE)) fs.writeFileSync(LINKS_FILE, '[]', 'utf-8');
 } catch (e) { console.error('Init error:', e.message); }
 
 app.listen(PORT, () => console.log('JOTIPS server on port ' + PORT + ' [GitHub sync: ' + !!GITHUB_TOKEN + ']'));

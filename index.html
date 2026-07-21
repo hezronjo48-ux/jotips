@@ -194,6 +194,11 @@
   <img id="lbImg" src="" alt="">
 </div>
 
+<div id="linksSection" style="display:none;max-width:1200px;margin:0 auto;padding:16px 20px 0">
+  <div style="font-size:13px;font-weight:600;color:var(--500);margin-bottom:8px">🔗 Betting Companies</div>
+  <div id="linksContainer" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+</div>
+
 <div class="container">
   <div class="controls">
     <div class="controls-left">
@@ -500,8 +505,25 @@
     if (a.views > 0) footer.innerHTML += '<br><span style="font-size:11px;opacity:.6">👁 ' + a.views + ' views</span>';
   }).catch(() => {});
 
+  async function loadLinks() {
+    try {
+      const r = await fetch(window.location.origin + '/api/links');
+      if (!r.ok) throw Error();
+      const links = await r.json();
+      const section = document.getElementById('linksSection');
+      const container = document.getElementById('linksContainer');
+      if (!links.length) { section.style.display = 'none'; return; }
+      section.style.display = 'block';
+      container.innerHTML = links.map(l =>
+        `<a href="${escAttr(l.url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:8px 16px;background:var(--100);border:1px solid var(--200);border-radius:var(--rs);font-size:13px;font-weight:600;color:var(--700);text-decoration:none;transition:var(--tr)">${esc(l.name)} ↗</a>`
+      ).join('');
+    } catch(e) {}
+  }
+  function escAttr(t) { return t.replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   loadTips();
   loadSlider();
+  loadLinks();
 </script>
 </body>
 </html>
