@@ -187,6 +187,9 @@ app.post('/api/analytics/tip-view/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// --- Config check ---
+app.get('/api/config', (req, res) => { res.json({ githubSync: !!GITHUB_TOKEN }); });
+
 // --- Links ---
 app.get('/api/links', (req, res) => { res.json(loadLinks().reverse()); });
 
