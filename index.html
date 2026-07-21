@@ -225,10 +225,12 @@
     const d = new Date(t.date);
     const ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     const n = t.note ? `<div class="tip-note">${esc(t.note)}</div>` : '';
+    const od = t.odds ? `<div class="tip-row"><span class="tip-label">🎯 Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">${esc(t.odds)}</span></div>` : '';
     return `<div class="tip-card" style="animation-delay:${Math.min(i * .05, .4)}s">
       <div class="tip-card-header"><div class="tip-name">${esc(t.name)}</div><div class="tip-date">📅 ${ds}</div></div>
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">🏢 Company</span><span class="tip-value">${esc(t.company)}</span></div>
+        ${od}
         <div class="tip-row"><span class="tip-label">🔑 Code</span><div class="code-wrap"><span class="tip-value code">${esc(t.code)}</span><button class="copy-btn" onclick="copyCode('${esc(t.code)}',this)" title="Copy code">📋</button></div></div>
         ${n}
       </div>
@@ -288,7 +290,8 @@
     x.fillStyle = 'rgba(255,255,255,.9)'; x.font = 'bold 13px Inter, sans-serif';
     x.fillText('BETTING TIP', w / 2, y - 2); y += 40;
 
-    const cx = p + 20, cw = w - p * 2 - 40, cy = y, ch = 180;
+    const hasOdds = tip.odds ? 45 : 0;
+    const cx = p + 20, cw = w - p * 2 - 40, cy = y, ch = 180 + hasOdds;
     x.fillStyle = 'rgba(255,255,255,.08)'; rRect(x, cx, cy, cw, ch, 16); x.fill();
     x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '12px Inter, sans-serif'; x.textAlign = 'left';
     x.fillText('BETTING COMPANY', cx + 30, cy + 35);
@@ -298,6 +301,12 @@
     x.fillText('BETTING CODE', cx + 30, cy + 105);
     x.fillStyle = '#fff'; x.font = 'bold 34px "Courier New", monospace';
     x.fillText(tip.code, cx + 30, cy + 148);
+    if (tip.odds) {
+      x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '12px Inter, sans-serif';
+      x.fillText('TOTAL ODDS', cx + 30, cy + 195);
+      x.fillStyle = '#fff'; x.font = 'bold 28px Inter, sans-serif';
+      x.fillText('@ ' + tip.odds, cx + 30, cy + 225);
+    }
 
     let ny = cy + ch + 30;
     if (tip.note) {

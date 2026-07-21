@@ -38,7 +38,7 @@ app.get('/api/tips', (req, res) => {
 });
 
 app.post('/api/tips', adminAuth, (req, res) => {
-  const { name, date, company, code, note } = req.body;
+  const { name, date, company, code, odds, note } = req.body;
   if (!name || !date || !company || !code) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -46,6 +46,7 @@ app.post('/api/tips', adminAuth, (req, res) => {
   const tip = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     name, date, company, code,
+    odds: odds || '',
     note: note || '',
     created: new Date().toISOString()
   };

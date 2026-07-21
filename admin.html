@@ -212,7 +212,11 @@
           <label>🏢 Betting Company</label>
           <input type="text" id="tipCompany" placeholder="e.g. Bet9ja, SportyBet" required>
         </div>
-        <div class="form-group full">
+        <div class="form-group">
+          <label>🎯 Total Odds</label>
+          <input type="text" id="tipOdds" placeholder="e.g. 3.50">
+        </div>
+        <div class="form-group">
           <label>🔑 Betting Code</label>
           <input type="text" id="tipCode" placeholder="e.g. 1X2-12345-ABCDE" required>
         </div>
@@ -304,10 +308,12 @@
   function cardHTML(t, id, i) {
     const d = new Date(t.date), ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     const n = t.note ? `<div class="tip-note">${esc(t.note)}</div>` : '';
+    const od = t.odds ? `<div class="tip-row"><span class="tip-label">Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">${esc(t.odds)}</span></div>` : '';
     return `<div class="tip-card" style="animation-delay:${Math.min(i * .06, .3)}s">
       <div class="tip-card-header"><div class="tip-name">${esc(t.name)}</div><div class="tip-date">📅 ${ds}</div></div>
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">Company</span><span class="tip-value">${esc(t.company)}</span></div>
+        ${od}
         <div class="tip-row"><span class="tip-label">Code</span><span class="tip-value code">${esc(t.code)}</span></div>
         ${n}
       </div>
@@ -326,13 +332,14 @@
     const date = document.getElementById('tipDate').value;
     const company = document.getElementById('tipCompany').value.trim();
     const code = document.getElementById('tipCode').value.trim();
+    const odds = document.getElementById('tipOdds').value.trim();
     const note = document.getElementById('tipNote').value.trim();
     if (!name || !date || !company || !code) { showToast('Fill all required fields', 'error'); return; }
 
     const btn = document.getElementById('submitBtn');
     btn.textContent = '⏳ Posting...'; btn.disabled = true;
 
-    const r = await postTip({ name, date, company, code, note });
+    const r = await postTip({ name, date, company, code, odds, note });
     if (r) {
       resetForm();
       await fetchTips();
@@ -407,6 +414,13 @@
     x.fillText('BETTING CODE', cx + 30, cy + 105);
     x.fillStyle = '#fff'; x.font = 'bold 34px "Courier New", monospace';
     x.fillText(tip.code, cx + 30, cy + 148);
+
+    if (tip.odds) {
+      x.fillStyle = 'rgba(255,255,255,.5)'; x.font = '12px Inter, sans-serif';
+      x.fillText('TOTAL ODDS', cx + 30, cy + 195);
+      x.fillStyle = '#fff'; x.font = 'bold 28px Inter, sans-serif';
+      x.fillText('@ ' + tip.odds, cx + 30, cy + 225);
+    }
 
     let ny = cy + ch + 30;
     if (tip.note) {
