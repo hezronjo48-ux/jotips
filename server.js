@@ -43,23 +43,53 @@ app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-// GitHub sync
+// GitHub sync via API
+const GH_API = 'https://api.github.com/repos/hezronjo48-ux/jotips/contents';
 let syncTimer = null;
+let shaCache = {};
+
+function ghFetch(path) {
+  return fetch(GH_API + '/' + path, { headers: { Authorization: 'Bearer ' + GITHUB_TOKEN, Accept: 'application/vnd.github.v3+json' } });
+}
+
+async function loadFromGitHub() {
+  if (!GITHUB_TOKEN) return;
+  for (const [file, loader] of [['tips.json', (d) => { if (d.length > 2) fs.writeFileSync(DATA_FILE, d, 'utf-8'); }], ['comments.json', (d) => { if (d.length > 2) fs.writeFileSync(COMMENTS_FILE, d, 'utf-8'); }], ['analytics.json', (d) => { if (d.length > 2) fs.writeFileSync(ANALYTICS_FILE, d, 'utf-8'); }], ['links.json', (d) => { if (d.length > 2) fs.writeFileSync(LINKS_FILE, d, 'utf-8'); }]]) {
+    try {
+      if (fs.existsSync(path.join(__dirname, file)) && fs.readFileSync(path.join(__dirname, file), 'utf-8').length > 2) continue;
+      const r = await ghFetch(file);
+      if (!r.ok) continue;
+      const j = await r.json();
+      const content = Buffer.from(j.content, 'base64').toString('utf-8');
+      shaCache[file] = j.sha;
+      loader(content);
+    } catch (e) { console.error('GitHub load error for ' + file + ':', e.message); }
+  }
+}
+
+async function ghPush(file, data) {
+  if (!GITHUB_TOKEN) return;
+  const content = Buffer.from(data, 'utf-8').toString('base64');
+  const body = { message: 'Auto-sync ' + file, content: content };
+  if (shaCache[file]) body.sha = shaCache[file];
+  try {
+    const r = await fetch(GH_API + '/' + file, {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + GITHUB_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (r.ok) { const j = await r.json(); shaCache[file] = j.content.sha; }
+    else { const e = await r.json(); if (e.message && e.message.indexOf('sha') >= 0) shaCache[file] = null; }
+  } catch (e) { console.error('GitHub push error for ' + file + ':', e.message); }
+}
 
 function syncGitHub() {
   if (!GITHUB_TOKEN) return;
   if (syncTimer) clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
-    const { exec } = require('child_process');
-    const remoteUrl = 'https://hezronjo48-ux:' + GITHUB_TOKEN + '@github.com/hezronjo48-ux/jotips.git';
-    exec('git add -A && git -c user.name="jotips-bot" -c user.email="jotips@bot.com" commit --allow-empty -m "Auto-sync data" && git push "' + remoteUrl + '" master', {
-      cwd: __dirname, timeout: 15000,
-    }, (err) => {
-      if (err) {
-        if (err.message.indexOf('nothing to commit') >= 0) return;
-        console.error('Git sync error:', err.message.slice(0, 200));
-      } else console.log('Git sync OK');
-    });
+    for (const [file, loader] of [['tips.json', () => fs.readFileSync(DATA_FILE, 'utf-8')], ['comments.json', () => fs.readFileSync(COMMENTS_FILE, 'utf-8')], ['analytics.json', () => fs.readFileSync(ANALYTICS_FILE, 'utf-8')], ['links.json', () => fs.readFileSync(LINKS_FILE, 'utf-8')]]) {
+      try { ghPush(file, loader()); } catch (e) { console.error('GitHub sync error:', e.message); }
+    }
   }, 2000);
 }
 
@@ -222,4 +252,8 @@ try {
   if (!fs.existsSync(LINKS_FILE)) fs.writeFileSync(LINKS_FILE, '[]', 'utf-8');
 } catch (e) { console.error('Init error:', e.message); }
 
-app.listen(PORT, () => console.log('JOTIPS server on port ' + PORT + ' [GitHub sync: ' + !!GITHUB_TOKEN + ']'));
+loadFromGitHub().then(() => {
+  app.listen(PORT, () => console.log('JOTIPS server on port ' + PORT + ' [GitHub sync: ' + !!GITHUB_TOKEN + ']'));
+}).catch(() => {
+  app.listen(PORT, () => console.log('JOTIPS server on port ' + PORT + ' [GitHub sync: ' + !!GITHUB_TOKEN + ']'));
+});
