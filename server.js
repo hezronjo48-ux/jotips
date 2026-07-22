@@ -6,6 +6,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const compression = require('compression');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,9 +40,11 @@ const upload = multer({
   }
 });
 
+app.use(compression());
 app.use(express.json());
-app.use(express.static(__dirname));
-app.use('/uploads', express.static(UPLOADS_DIR));
+const cacheOpts = { maxAge: '1h', etag: true, lastModified: true };
+app.use(express.static(__dirname, cacheOpts));
+app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '1d', etag: true }));
 
 // GitHub sync via API
 const GH_API = 'https://api.github.com/repos/hezronjo48-ux/jotips/contents';

@@ -206,11 +206,9 @@
   </div>
 
   <div class="admin-panel" id="adminPanel">
-    <div class="section-header">
-      <div class="section-title">✏️ Post a Tip</div>
-    </div>
-
     <form class="tip-form" id="tipForm" onsubmit="saveTip(event)">
+      <div class="section-title" id="formTitle">✏️ Post a Tip</div>
+      <div style="height:2px"></div>
       <div class="form-grid">
         <div class="form-group full">
           <label>📌 Name of the Tip</label>
@@ -253,6 +251,15 @@
 
     <div class="section-header">
       <div class="section-title">📋 All Tips <span class="tip-count" id="tipCount">0</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <select id="sortSelect" style="padding:6px 10px;border:2px solid var(--200);border-radius:7px;font-family:inherit;font-size:12px;background:var(--50);color:var(--700)" onchange="sortBy=this.value;renderTips()">
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+          <option value="won">Won first</option>
+          <option value="lost">Lost first</option>
+          <option value="pending">Pending first</option>
+        </select>
+      </div>
     </div>
     <div id="adminTipsList"></div>
 
@@ -317,7 +324,7 @@
 <script>
   const API = window.location.origin + '/api/tips';
   const COMMENT_API = window.location.origin + '/api/comments';
-  let tips = [], adminToken = '', confirmCallback = null;
+  let tips = [], adminToken = '', confirmCallback = null, editingId = null, sortBy = 'newest';
 
   function fetchTips() {
     setStatus('offline');
@@ -384,7 +391,12 @@
   function renderTips() {
     const c = document.getElementById('adminTipsList');
     if (!tips.length) { c.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>No tips yet</h3><p>Post your first betting tip above</p></div>'; return; }
-    c.innerHTML = '<div class="tips-grid">' + tips.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
+    let sorted = [...tips];
+    if (sortBy === 'oldest') sorted.reverse();
+    else if (sortBy === 'won') sorted.sort((a,b) => (a.result||'pending') === 'won' ? -1 : (b.result||'pending') === 'won' ? 1 : 0);
+    else if (sortBy === 'lost') sorted.sort((a,b) => (a.result||'pending') === 'lost' ? -1 : (b.result||'pending') === 'lost' ? 1 : 0);
+    else if (sortBy === 'pending') sorted.sort((a,b) => (a.result||'pending') === 'pending' ? -1 : (b.result||'pending') === 'pending' ? 1 : 0);
+    c.innerHTML = '<div class="tips-grid">' + sorted.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
   }
 
   function cardHTML(t, id, i) {
@@ -417,6 +429,7 @@
         </div>
       </div>
       <div class="tip-card-footer">
+        <button class="btn btn-sm btn-so" onclick="editTip('${id}')">✏️ Edit</button>
         <button class="btn btn-sm btn-so" onclick="downloadPoster('${id}')">📸 Poster</button>
         <button class="btn btn-sm btn-danger" onclick="confirmDelete('${id}')">🗑 Delete</button>
       </div>
@@ -424,6 +437,21 @@
   }
 
   function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+  function editTip(id) {
+    const t = tips.find(x => x.id === id); if (!t) return;
+    document.getElementById('tipName').value = t.name;
+    document.getElementById('tipDate').value = t.date;
+    document.getElementById('tipCompany').value = t.company;
+    document.getElementById('tipCode').value = t.code;
+    document.getElementById('tipOdds').value = t.odds || '';
+    document.getElementById('tipResult').value = t.result || 'pending';
+    document.getElementById('tipNote').value = t.note || '';
+    editingId = id;
+    document.getElementById('submitBtn').textContent = '💾 Update Tip';
+    document.getElementById('formTitle').textContent = '✏️ Edit Tip';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   async function changeResult(id, value) {
     const r = await updateTip(id, { result: value });
@@ -466,9 +494,14 @@
     const note = document.getElementById('tipNote').value.trim();
     if (!name || !date || !company || !code) { showToast('Fill all required fields', 'error'); return; }
     const btn = document.getElementById('submitBtn');
-    btn.textContent = '⏳ Posting...'; btn.disabled = true;
-    const r = await postTip({ name, date, company, code, odds, result, note });
-    if (r) { resetForm(); await fetchTips(); showToast('Tip posted! ✓', 'success'); }
+    btn.textContent = '⏳ Saving...'; btn.disabled = true;
+    if (editingId) {
+      const r = await updateTip(editingId, { name, date, company, code, odds, result, note });
+      if (r) { resetForm(); await fetchTips(); showToast('Tip updated! ✓', 'success'); }
+    } else {
+      const r = await postTip({ name, date, company, code, odds, result, note });
+      if (r) { resetForm(); await fetchTips(); showToast('Tip posted! ✓', 'success'); }
+    }
     btn.textContent = '🚀 Post Tip'; btn.disabled = false;
   }
 
@@ -492,6 +525,8 @@
     document.getElementById('tipForm').reset();
     document.getElementById('submitBtn').textContent = '🚀 Post Tip';
     document.getElementById('tipDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('formTitle').textContent = '✏️ Post a Tip';
+    editingId = null;
   }
 
   function findTip(id) { return tips.find(t => t.id === id); }
@@ -708,11 +743,11 @@
       } else {
         document.getElementById('topTips').innerHTML = '<div style="color:var(--400)">No tip usage data yet</div>';
       }
-      // Comment count
       try {
         const c = await fetch(window.location.origin + '/api/comments/all');
         if (c.ok) { const all = await c.json(); document.getElementById('statComments').textContent = all.length; }
       } catch(e) {}
+      document.getElementById('statImages').textContent = document.querySelectorAll('#galleryGrid .gallery-item').length || 0;
     } catch(e) { document.getElementById('topTips').innerHTML = 'Could not load'; }
   }
 

@@ -154,6 +154,10 @@
 
     ::-webkit-scrollbar { width: 7px; } ::-webkit-scrollbar-track { background: var(--100); } ::-webkit-scrollbar-thumb { background: var(--300); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: var(--400); }
 
+    #linksContainer a { min-height: 44px; }
+    .comments-toggle, .copy-btn, .btn { min-height: 40px; min-width: 40px; }
+    input, textarea, select { font-size: 16px; }
+
     @media (max-width: 640px) {
       .hero h1 { font-size: 22px; } .hero { padding: 28px 16px 24px; }
       .container { padding: 20px 12px; }
@@ -162,6 +166,12 @@
       .tips-grid { grid-template-columns: 1fr; }
       .skeleton-grid { grid-template-columns: 1fr; }
       .header-inner { padding: 12px 16px; }
+      .tip-card-header .tip-name { font-size: 15px; padding-right: 70px; }
+      .result-badge { font-size: 10px; padding: 3px 8px; top: 12px; right: 12px; }
+      .tip-card-body { padding: 14px 16px; }
+      .tip-card-header { padding: 14px 16px; }
+      .tip-card-footer { padding: 10px 16px; }
+      .slider { height: 180px; }
     }
   </style>
 </head>
@@ -452,7 +462,7 @@
       const dots = document.getElementById('sliderDots');
       const empty = document.getElementById('sliderEmpty');
       if (!files.length) { slider.innerHTML = '<div class="slider-empty">No images yet</div>'; dots.innerHTML = ''; return; }
-      slider.innerHTML = files.map((f, i) => `<img src="/uploads/${f}" class="${i === 0 ? 'active' : ''}" alt="">`).join('');
+      slider.innerHTML = files.map((f, i) => `<img src="/uploads/${f}" class="${i === 0 ? 'active' : ''}" alt="" loading="lazy">`).join('');
       slider.onclick = function() { const img = this.querySelector('.active'); if (img) openLightbox(img.src); };
       dots.innerHTML = files.map((f, i) => `<span class="${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></span>`).join('');
       slideIndex = 0;
