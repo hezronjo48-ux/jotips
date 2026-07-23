@@ -27,29 +27,5 @@
     "away_team": "",
     "predictions": [],
     "created": "2026-07-23T13:42:22.453Z"
-  },
-  {
-    "id": "mrxli6wnzkk8",
-    "name": "WED",
-    "date": "2026-07-23",
-    "company": "1WIN BET",
-    "code": "Ugx9ip8",
-    "odds": "8",
-    "result": "pending",
-    "note": "",
-    "category": "football",
-    "confidence": 3,
-    "featured": false,
-    "stake": 100,
-    "home_team": "",
-    "away_team": "",
-    "predictions": [
-      {
-        "home": "Dublanc FC",
-        "away": "St. Johns SC",
-        "pick": "1"
-      }
-    ],
-    "created": "2026-07-23T14:17:17.687Z"
   }
 ]
