@@ -8,6 +8,11 @@
     "odds": "8",
     "result": "pending",
     "note": "Twondoke wakamalia its 50 50",
-    "created": "2026-07-22T18:21:05.010Z"
+    "created": "2026-07-22T18:21:05.010Z",
+    "category": "other",
+    "confidence": 5,
+    "stake": 5000000,
+    "featured": false,
+    "predictions": []
   }
 ]
