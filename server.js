@@ -48,8 +48,9 @@ app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '1d', etag: true }));
 
 // GitHub sync via API
 const GH_API = 'https://api.github.com/repos/hezronjo48-ux/jotips/contents';
-let syncTimer = null;
 let shaCache = {};
+let syncInProgress = false;
+let periodicTimer = null;
 
 function ghFetch(path) {
   return fetch(GH_API + '/' + path, { headers: { Authorization: 'Bearer ' + GITHUB_TOKEN, Accept: 'application/vnd.github.v3+json' } });
@@ -59,21 +60,31 @@ async function loadFromGitHub() {
   if (!GITHUB_TOKEN) return;
   for (const [file, loader] of [['tips.json', (d) => { if (d.length > 2) fs.writeFileSync(DATA_FILE, d, 'utf-8'); }], ['comments.json', (d) => { if (d.length > 2) fs.writeFileSync(COMMENTS_FILE, d, 'utf-8'); }], ['analytics.json', (d) => { if (d.length > 2) fs.writeFileSync(ANALYTICS_FILE, d, 'utf-8'); }], ['links.json', (d) => { if (d.length > 2) fs.writeFileSync(LINKS_FILE, d, 'utf-8'); }]]) {
     try {
-      if (fs.existsSync(path.join(__dirname, file)) && fs.readFileSync(path.join(__dirname, file), 'utf-8').length > 2) continue;
+      const localFile = path.join(__dirname, file);
+      const localContent = fs.existsSync(localFile) ? fs.readFileSync(localFile, 'utf-8') : '';
+      // ALWAYS try to load from GitHub on fresh instance, but only overwrite if GitHub has more data
       const r = await ghFetch(file);
       if (!r.ok) continue;
       const j = await r.json();
-      const content = Buffer.from(j.content, 'base64').toString('utf-8');
+      const ghContent = Buffer.from(j.content, 'base64').toString('utf-8');
       shaCache[file] = j.sha;
-      loader(content);
+      // Only overwrite local if GitHub has real content and local is empty/barely initialized
+      if (ghContent.length > 2 && localContent.length <= 2) {
+        loader(ghContent);
+        console.log('GitHub restored ' + file + ' (' + ghContent.length + ' bytes)');
+      } else if (ghContent.length > 2 && localContent.length > 2) {
+        // Both have data — merge: keep local, push local to GitHub to ensure it's backed up
+        console.log('Local ' + file + ' has data, pushing backup...');
+        ghPush(file, localContent);
+      }
     } catch (e) { console.error('GitHub load error for ' + file + ':', e.message); }
   }
 }
 
 async function ghPush(file, data) {
-  if (!GITHUB_TOKEN) return;
+  if (!GITHUB_TOKEN || !data || data.length <= 2) return;
   const content = Buffer.from(data, 'utf-8').toString('base64');
-  const body = { message: 'Auto-sync ' + file, content: content };
+  const body = { message: 'Auto-sync ' + file + ' [' + new Date().toISOString().slice(0,19) + ']', content: content };
   if (shaCache[file]) body.sha = shaCache[file];
   try {
     const r = await fetch(GH_API + '/' + file, {
@@ -82,18 +93,48 @@ async function ghPush(file, data) {
       body: JSON.stringify(body)
     });
     if (r.ok) { const j = await r.json(); shaCache[file] = j.content.sha; }
-    else { const e = await r.json(); if (e.message && e.message.indexOf('sha') >= 0) shaCache[file] = null; }
+    else {
+      const e = await r.json();
+      if (e.message && e.message.indexOf('sha') >= 0) {
+        // SHA mismatch — refetch SHA and retry once
+        shaCache[file] = null;
+        try {
+          const rr = await ghFetch(file);
+          if (rr.ok) { const jj = await rr.json(); shaCache[file] = jj.sha; body.sha = jj.sha; }
+          const r2 = await fetch(GH_API + '/' + file, {
+            method: 'PUT',
+            headers: { Authorization: 'Bearer ' + GITHUB_TOKEN, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          if (r2.ok) { const j2 = await r2.json(); shaCache[file] = j2.content.sha; }
+          else console.error('GitHub push retry failed for ' + file + ':', await r2.text().catch(()=>''));
+        } catch(e2) { console.error('GitHub push retry error for ' + file + ':', e2.message); }
+      } else {
+        console.error('GitHub push error for ' + file + ':', e.message || await r.text().catch(()=>''));
+      }
+    }
   } catch (e) { console.error('GitHub push error for ' + file + ':', e.message); }
 }
 
-function syncGitHub() {
+async function syncNow() {
+  if (!GITHUB_TOKEN || syncInProgress) return;
+  syncInProgress = true;
+  const files = [['tips.json', DATA_FILE], ['comments.json', COMMENTS_FILE], ['analytics.json', ANALYTICS_FILE], ['links.json', LINKS_FILE]];
+  for (const [file, localPath] of files) {
+    try {
+      const data = fs.readFileSync(localPath, 'utf-8');
+      if (data && data.length > 2) await ghPush(file, data);
+    } catch (e) { console.error('Sync error for ' + file + ':', e.message); }
+  }
+  syncInProgress = false;
+}
+
+function startPeriodicSync() {
   if (!GITHUB_TOKEN) return;
-  if (syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => {
-    for (const [file, loader] of [['tips.json', () => fs.readFileSync(DATA_FILE, 'utf-8')], ['comments.json', () => fs.readFileSync(COMMENTS_FILE, 'utf-8')], ['analytics.json', () => fs.readFileSync(ANALYTICS_FILE, 'utf-8')], ['links.json', () => fs.readFileSync(LINKS_FILE, 'utf-8')]]) {
-      try { ghPush(file, loader()); } catch (e) { console.error('GitHub sync error:', e.message); }
-    }
-  }, 2000);
+  if (periodicTimer) clearInterval(periodicTimer);
+  periodicTimer = setInterval(syncNow, 60000);
+  // Also fire immediately
+  setTimeout(syncNow, 1000);
 }
 
 // Helpers
@@ -101,25 +142,25 @@ function loadTips() {
   try { if (fs.existsSync(DATA_FILE)) return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')); } catch (e) {}
   return [];
 }
-function saveTips(data, s) { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
+function saveTips(data, s) { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncNow(); }
 
 function loadComments() {
   try { if (fs.existsSync(COMMENTS_FILE)) return JSON.parse(fs.readFileSync(COMMENTS_FILE, 'utf-8')); } catch (e) {}
   return [];
 }
-function saveComments(data, s) { fs.writeFileSync(COMMENTS_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
+function saveComments(data, s) { fs.writeFileSync(COMMENTS_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncNow(); }
 
 function loadAnalytics() {
   try { if (fs.existsSync(ANALYTICS_FILE)) return JSON.parse(fs.readFileSync(ANALYTICS_FILE, 'utf-8')); } catch (e) {}
   return { views: 0, tipViews: {} };
 }
-function saveAnalytics(a, s) { fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(a, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
+function saveAnalytics(a, s) { fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(a, null, 2), 'utf-8'); if (s !== false) syncNow(); }
 
 function loadLinks() {
   try { if (fs.existsSync(LINKS_FILE)) return JSON.parse(fs.readFileSync(LINKS_FILE, 'utf-8')); } catch (e) {}
   return [];
 }
-function saveLinks(data, s) { fs.writeFileSync(LINKS_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncGitHub(); }
+function saveLinks(data, s) { fs.writeFileSync(LINKS_FILE, JSON.stringify(data, null, 2), 'utf-8'); if (s !== false) syncNow(); }
 
 function loadImages() {
   try { return fs.readdirSync(UPLOADS_DIR).filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f)).sort().reverse(); }
@@ -291,7 +332,9 @@ try {
 } catch (e) { console.error('Init error:', e.message); }
 
 loadFromGitHub().then(() => {
+  startPeriodicSync();
   app.listen(PORT, () => console.log('JOTIPS server on port ' + PORT + ' [GitHub sync: ' + !!GITHUB_TOKEN + ']'));
 }).catch(() => {
+  startPeriodicSync();
   app.listen(PORT, () => console.log('JOTIPS server on port ' + PORT + ' [GitHub sync: ' + !!GITHUB_TOKEN + ']'));
 });
