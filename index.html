@@ -86,6 +86,11 @@
     .result-badge.won { background: #166534; color: #bbf7d0; }
     .result-badge.lost { background: #991b1b; color: #fecaca; }
 
+    .score-badge { padding: 8px 16px; font-size: 13px; font-weight: 700; text-align: center; border-bottom: 1px solid var(--100); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .score-badge.score-live { background: rgba(239,68,68,.08); color: #ef4444; }
+    .score-badge.score-fin { background: rgba(34,197,94,.08); color: #22c55e; }
+    .score-badge.score-up { background: rgba(100,116,139,.08); color: var(--500); }
+
     .tip-card-body { padding: 16px 20px; }
     .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--100); gap: 10px; }
     .tip-row:last-of-type { border-bottom: none; }
@@ -418,6 +423,23 @@
     return null;
   }
 
+  function getScoreHTML(t) {
+    var h = t.home_team || '', a = t.away_team || '';
+    if (!h && !a && t.name && t.name.match(/\s+vs\s+/i)) {
+      var parts = t.name.split(/\s+vs\s+/i);
+      h = (parts[0]||'').trim(); a = (parts[1]||'').trim();
+    }
+    if (!h || !a) return '';
+    var key = h.toLowerCase().trim() + '|' + a.toLowerCase().trim();
+    var m = scores[key];
+    if (!m) return '';
+    var sc = (m.home_score != null && m.away_score != null) ? m.home_score + '-' + m.away_score : '';
+    var status = m.status || '';
+    var cls = status === 'live' ? 'score-live' : (status === 'finished' ? 'score-fin' : 'score-up');
+    var icon = status === 'live' ? '🔴' : (status === 'finished' ? '✅' : '📅');
+    return '<div class="score-badge ' + cls + '">' + icon + ' ' + esc(h) + ' ' + sc + ' ' + esc(a) + ' <span style="font-size:10px;opacity:.7">' + status + '</span></div>';
+  }
+
   function getSelectionHTML(t) {
     if (!t.predictions || !t.predictions.length) return '';
     const lines = t.predictions.map(p => {
@@ -455,6 +477,7 @@
         <div class="tip-name">${cat[t.category]||'📌'} ${esc(t.name)}${ft} <span class="result-badge ${result}">${badge[result]}</span></div>
         <div class="tip-date">📅 ${ds} &nbsp; <span style="opacity:.7">${stars}</span></div>
       </div>
+      ${getScoreHTML(t)}
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">🏢 Company</span><span class="tip-value">${esc(t.company)}</span></div>
         ${od}${stk}
