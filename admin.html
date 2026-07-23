@@ -240,6 +240,14 @@
           </select>
         </div>
         <div class="form-group">
+          <label>🏠 Home Team <span style="font-weight:400;color:var(--400);font-size:12px">(for live score)</span></label>
+          <input type="text" id="tipHomeTeam" placeholder="e.g. Manchester United">
+        </div>
+        <div class="form-group">
+          <label>✈️ Away Team <span style="font-weight:400;color:var(--400);font-size:12px">(for live score)</span></label>
+          <input type="text" id="tipAwayTeam" placeholder="e.g. Liverpool">
+        </div>
+        <div class="form-group">
           <label>⭐ Confidence</label>
           <select id="tipConfidence">
             <option value="1">1 - Low</option>
@@ -294,7 +302,7 @@
       <div class="section-header">
         <div class="section-title">📦 Bulk Import</div>
       </div>
-      <p style="font-size:13px;color:var(--400);margin-bottom:8px">Paste tips in format: <code style="background:var(--200);padding:2px 6px;border-radius:4px">Name | Date | Company | Code | Odds | Category</code> (one per line)</p>
+      <p style="font-size:13px;color:var(--400);margin-bottom:8px">Paste tips in format: <code style="background:var(--200);padding:2px 6px;border-radius:4px">Name | Date | Company | Code | Odds | Category | HomeTeam | AwayTeam</code> (one per line)</p>
       <textarea id="bulkInput" style="width:100%;padding:12px;border:2px solid var(--200);border-radius:var(--rs);font-family:inherit;font-size:13px;outline:none;background:var(--50);color:var(--800);min-height:120px;resize:vertical" placeholder="Liverpool vs Arsenal | 2024-12-25 | Bet9ja | 1X2-ABC | 2.50 | football"></textarea>
       <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-sea" onclick="bulkImport()">📦 Import All</button>
@@ -480,6 +488,7 @@
     const catIcon = cat[t.category] || '📌';
     const stars = '★'.repeat(t.confidence || 3) + '☆'.repeat(5 - (t.confidence || 3));
     const ft = t.featured ? '<span style="font-size:11px;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:12px;margin-left:6px">🔥 Featured</span>' : '';
+    const tm = (t.home_team || t.away_team) ? `<div class="tip-row"><span class="tip-label">Match</span><span class="tip-value">${esc(t.home_team||'?')} vs ${esc(t.away_team||'?')}</span></div>` : '';
     const stk = t.stake ? `<div class="tip-row"><span class="tip-label">Stake</span><span class="tip-value">KES ${parseFloat(t.stake).toLocaleString()}</span></div>` : '';
     return `<div class="tip-card" style="animation-delay:${Math.min(i * .06, .3)}s">
       <div class="tip-card-header">
@@ -488,7 +497,7 @@
       </div>
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">Company</span><span class="tip-value">${esc(t.company)}</span></div>
-        ${od}${stk}
+        ${od}${tm}${stk}
         <div class="tip-row"><span class="tip-label">Code</span><span class="tip-value code">${esc(t.code)}</span></div>
         <div class="tip-row">
           <span class="tip-label">Result</span>
@@ -516,9 +525,9 @@
 
   function exportCSV() {
     if (!tips.length) { showToast('No tips to export', 'error'); return; }
-    const headers = 'Name,Date,Company,Code,Odds,Result,Category,Confidence,Stake,Featured,Note,Created';
+    const headers = 'Name,Date,Company,Code,Odds,Result,Category,Confidence,Stake,Featured,HomeTeam,AwayTeam,Note,Created';
     const rows = tips.map(t => {
-      const vals = [t.name, t.date, t.company, t.code, t.odds, t.result||'pending', t.category||'other', t.confidence||3, t.stake||0, t.featured?'Yes':'No', (t.note||'').replace(/,/g,';'), t.created];
+      const vals = [t.name, t.date, t.company, t.code, t.odds, t.result||'pending', t.category||'other', t.confidence||3, t.stake||0, t.featured?'Yes':'No', t.home_team||'', t.away_team||'', (t.note||'').replace(/,/g,';'), t.created];
       return '"' + vals.join('","') + '"';
     });
     const csv = headers + '\n' + rows.join('\n');
@@ -540,6 +549,8 @@
     document.getElementById('tipResult').value = t.result || 'pending';
     document.getElementById('tipStake').value = t.stake || '';
     document.getElementById('tipFeatured').checked = !!t.featured;
+    document.getElementById('tipHomeTeam').value = t.home_team || '';
+    document.getElementById('tipAwayTeam').value = t.away_team || '';
     document.getElementById('tipNote').value = t.note || '';
     editingId = id;
     document.getElementById('submitBtn').textContent = '💾 Update Tip';
@@ -589,11 +600,13 @@
     const result = document.getElementById('tipResult').value;
     const stake = document.getElementById('tipStake').value.trim();
     const featured = document.getElementById('tipFeatured').checked;
+    const home_team = document.getElementById('tipHomeTeam').value.trim();
+    const away_team = document.getElementById('tipAwayTeam').value.trim();
     const note = document.getElementById('tipNote').value.trim();
     if (!name || !date || !company || !code) { showToast('Fill all required fields', 'error'); return; }
     const btn = document.getElementById('submitBtn');
     btn.textContent = '⏳ Saving...'; btn.disabled = true;
-    const payload = { name, date, company, code, odds, category, confidence: parseInt(confidence), result, stake: parseFloat(stake) || 0, featured, note };
+    const payload = { name, date, company, code, odds, category, confidence: parseInt(confidence), result, stake: parseFloat(stake) || 0, featured, note, home_team, away_team };
     if (editingId) {
       const r = await updateTip(editingId, payload);
       if (r) { resetForm(); await fetchTips(); showToast('Tip updated! ✓', 'success'); }
@@ -624,6 +637,8 @@
     document.getElementById('tipForm').reset();
     document.getElementById('submitBtn').textContent = '🚀 Post Tip';
     document.getElementById('tipDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('tipHomeTeam').value = '';
+    document.getElementById('tipAwayTeam').value = '';
     document.getElementById('formTitle').textContent = '✏️ Post a Tip';
     editingId = null;
   }
@@ -770,7 +785,7 @@
     const lines = text.split('\n').filter(l => l.trim());
     const tips = lines.map(line => {
       const parts = line.split('|').map(s => s.trim());
-      return { name: parts[0] || '', date: parts[1] || '', company: parts[2] || '', code: parts[3] || '', odds: parts[4] || '', category: parts[5] || 'other', confidence: 3 };
+      return { name: parts[0] || '', date: parts[1] || '', company: parts[2] || '', code: parts[3] || '', odds: parts[4] || '', category: parts[5] || 'other', confidence: 3, home_team: parts[6] || '', away_team: parts[7] || '' };
     }).filter(t => t.name && t.date && t.company && t.code);
     if (!tips.length) { showToast('No valid tips found', 'error'); return; }
     try {

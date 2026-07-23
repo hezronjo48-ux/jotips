@@ -86,6 +86,11 @@
     .result-badge.won { background: #166534; color: #bbf7d0; }
     .result-badge.lost { background: #991b1b; color: #fecaca; }
 
+    .score-badge { padding: 8px 16px; font-size: 13px; font-weight: 700; text-align: center; border-bottom: 1px solid var(--100); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .score-badge.score-live { background: rgba(239,68,68,.08); color: #ef4444; }
+    .score-badge.score-fin { background: rgba(34,197,94,.08); color: #22c55e; }
+    .score-badge.score-up { background: rgba(100,116,139,.08); color: var(--500); }
+
     .tip-card-body { padding: 16px 20px; }
     .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--100); gap: 10px; }
     .tip-row:last-of-type { border-bottom: none; }
@@ -262,7 +267,7 @@
 <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <div class="footer">
-  JOTIPS &mdash; Betting Tips &bull; <a href="/admin.html" target="_blank">Admin</a>
+  JOTIPS &mdash; Betting Tips &bull; <a href="/admin.html" target="_blank">Admin</a> &bull; <a href="https://sportscore.com" target="_blank" rel="noopener">Live scores by SportScore</a>
   <div class="views" id="viewCount"></div>
 </div>
 
@@ -272,6 +277,26 @@
   const API = window.location.origin + '/api/tips';
   const COMMENT_API = window.location.origin + '/api/comments';
   let tips = [], currentFilter = 'all', currentCategory = 'all', currentSearch = '';
+  let scores = {};
+
+  async function fetchLiveScores() {
+    const sports = ['football', 'basketball', 'tennis'];
+    const all = {};
+    for (const sport of sports) {
+      try {
+        const r = await fetch('https://sportscore.com/api/widget/matches/?sport=' + sport + '&limit=50');
+        if (!r.ok) continue;
+        const data = await r.json();
+        const list = data.matches || [];
+        for (const m of list) {
+          const key = (m.home_name||'').toLowerCase().trim() + '|' + (m.away_name||'').toLowerCase().trim();
+          all[key] = m;
+        }
+      } catch(e) {}
+    }
+    scores = all;
+    if (tips.length) filterTips();
+  }
 
   async function loadTips() {
     const c = document.getElementById('tipsContainer');
@@ -372,6 +397,18 @@
     navigator.clipboard.writeText(codes).then(() => showToast('Copied ' + tips.filter(t => (t.result||'pending')==='pending').length + ' codes!')).catch(() => showToast('Could not copy'));
   }
 
+  function getScoreHTML(t) {
+    if (!t.home_team && !t.away_team) return '';
+    const key = (t.home_team||'').toLowerCase().trim() + '|' + (t.away_team||'').toLowerCase().trim();
+    const m = scores[key];
+    if (!m) return '';
+    const sc = (m.home_score != null && m.away_score != null) ? m.home_score + '-' + m.away_score : '';
+    const status = m.status || '';
+    const cls = status === 'live' ? 'score-live' : (status === 'finished' ? 'score-fin' : 'score-up');
+    const icon = status === 'live' ? '🔴' : (status === 'finished' ? '✅' : '📅');
+    return '<div class="score-badge ' + cls + '">' + icon + ' ' + esc(t.home_team||'?') + ' ' + sc + ' ' + esc(t.away_team||'?') + ' <span style="font-size:10px;opacity:.7">' + status + '</span></div>';
+  }
+
   function cardHTML(t, id, i) {
     const d = new Date(t.date);
     const ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
@@ -390,6 +427,7 @@
         <div class="tip-name">${cat[t.category]||'📌'} ${esc(t.name)}${ft} <span class="result-badge ${result}">${badge[result]}</span></div>
         <div class="tip-date">📅 ${ds} &nbsp; <span style="opacity:.7">${stars}</span></div>
       </div>
+      ${getScoreHTML(t)}
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">🏢 Company</span><span class="tip-value">${esc(t.company)}</span></div>
         ${od}${stk}
@@ -645,7 +683,8 @@
   }
   function escAttr(t) { return t.replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  loadTips();
+  fetchLiveScores().then(() => loadTips());
+  setInterval(fetchLiveScores, 60000);
   loadSlider();
   loadLinks();
 </script>
