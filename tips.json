@@ -27,29 +27,5 @@
     "away_team": "",
     "predictions": [],
     "created": "2026-07-23T13:42:22.453Z"
-  },
-  {
-    "id": "mrxl5zimnu3k",
-    "name": "TED",
-    "date": "2026-07-23",
-    "company": "1WIN BET",
-    "code": "1DBX",
-    "odds": "2",
-    "result": "pending",
-    "note": "DONE",
-    "category": "football",
-    "confidence": 3,
-    "featured": false,
-    "stake": 0,
-    "home_team": "",
-    "away_team": "",
-    "predictions": [
-      {
-        "home": "Suya Weiyutang FC",
-        "away": "Max Hyper Eagles Guangzhou FC",
-        "pick": "1"
-      }
-    ],
-    "created": "2026-07-23T14:07:48.238Z"
   }
 ]
