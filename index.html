@@ -307,7 +307,6 @@
     document.getElementById('countWon').textContent = won;
     document.getElementById('countLost').textContent = lost;
     document.getElementById('countPending').textContent = tips.filter(t => (t.result||'pending') === 'pending').length;
-    document.getElementById('tipCount').textContent = total;
     // Category stats
     const cats = ['football','basketball','tennis','other'];
     const catLabels = { football:'⚽ Football', basketball:'🏀 Basketball', tennis:'🎾 Tennis', other:'📌 Other' };
