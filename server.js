@@ -143,6 +143,7 @@ app.post('/api/tips', adminAuth, (req, res) => {
     category: req.body.category || 'other', confidence: Math.min(5, Math.max(1, parseInt(req.body.confidence) || 3)),
     featured: !!req.body.featured, stake: parseFloat(req.body.stake) || 0,
     home_team: (req.body.home_team || '').trim(), away_team: (req.body.away_team || '').trim(),
+    predictions: req.body.predictions || [],
     created: new Date().toISOString()
   };
   const t = loadTips(); t.push(tip); saveTips(t);
@@ -235,7 +236,7 @@ app.post('/api/tips/bulk', adminAuth, (req, res) => {
     note: (item.note || '').trim(), category: item.category || 'other',
     confidence: Math.min(5, Math.max(1, parseInt(item.confidence) || 3)), featured: !!item.featured,
     stake: parseFloat(item.stake) || 0, home_team: (item.home_team || '').trim(), away_team: (item.away_team || '').trim(),
-    created: now
+    predictions: item.predictions || [], created: now
   }));
   const t = loadTips(); t.push(...created); saveTips(t);
   res.json({ success: true, count: created.length, tips: created });

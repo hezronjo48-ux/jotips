@@ -112,6 +112,19 @@
 
     .tip-note { margin-top: 10px; padding: 10px 14px; background: var(--200); border-radius: var(--rs); font-size: 13px; color: var(--600); line-height: 1.6; border-left: 3px solid var(--sea-light); }
 
+    .selections-box { margin-top: 10px; border: 1px solid var(--200); border-radius: var(--rs); overflow: hidden; font-size: 12px; }
+    .sel-header { padding: 8px 12px; background: var(--100); font-weight: 700; color: var(--700); font-size: 11px; text-transform: uppercase; letter-spacing: .3px; border-bottom: 1px solid var(--200); }
+    .sel-row { display: flex; align-items: center; padding: 7px 12px; border-bottom: 1px solid var(--100); gap: 8px; }
+    .sel-row:last-child { border-bottom: none; }
+    .sel-match { flex: 1; color: var(--700); font-weight: 500; }
+    .sel-pick { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px; background: var(--200); color: var(--600); min-width: 24px; text-align: center; }
+    .sel-status { font-size: 11px; font-weight: 700; min-width: 55px; text-align: right; }
+    .sel-won { background: rgba(34,197,94,.06); }
+    .sel-won .sel-status { color: #22c55e; }
+    .sel-lost { background: rgba(239,68,68,.06); }
+    .sel-lost .sel-status { color: #ef4444; }
+    .sel-pend .sel-status { color: var(--400); }
+
     .comments-section { margin-top: 10px; border-top: 1px solid var(--100); padding-top: 10px; }
     .comments-toggle { background: none; border: none; color: var(--500); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 4px 0; }
     .comments-toggle:hover { color: var(--sea); }
@@ -277,6 +290,10 @@
           <label>📝 Note <span style="font-weight:400;color:var(--400);font-size:12px">(optional)</span></label>
           <textarea id="tipNote" placeholder="Any additional details or predictions..."></textarea>
         </div>
+        <div class="form-group full">
+          <label>📋 Selections <span style="font-weight:400;color:var(--400);font-size:12px">(one per line: <b>HomeTeam | AwayTeam | 1/2/X</b> — 1=Home, 2=Away, X=Draw)</span></label>
+          <textarea id="tipPredictions" rows="4" placeholder="Manchester United | Liverpool | 1&#10;Barcelona | Real Madrid | 2&#10;Chelsea | Arsenal | X" style="width:100%;padding:11px 14px;border:2px solid var(--200);border-radius:var(--rs);font-family:inherit;font-size:13px;outline:none;background:var(--50);color:var(--800);resize:vertical"></textarea>
+        </div>
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-so btn-sm" onclick="resetForm()">Clear</button>
@@ -404,6 +421,26 @@
   const API = window.location.origin + '/api/tips';
   const COMMENT_API = window.location.origin + '/api/comments';
   let tips = [], adminToken = '', confirmCallback = null, editingId = null, sortBy = 'newest';
+  let scores = {};
+
+  async function fetchLiveScores() {
+    const sports = ['football', 'basketball', 'tennis'];
+    const all = {};
+    for (const sport of sports) {
+      try {
+        const r = await fetch('https://sportscore.com/api/widget/matches/?sport=' + sport + '&limit=50');
+        if (!r.ok) continue;
+        const data = await r.json();
+        const list = data.matches || [];
+        for (const m of list) {
+          const key = (m.home_name||'').toLowerCase().trim() + '|' + (m.away_name||'').toLowerCase().trim();
+          all[key] = m;
+        }
+      } catch(e) {}
+    }
+    scores = all;
+    if (tips.length) renderTips();
+  }
 
   function fetchTips() {
     setStatus('offline');
@@ -478,6 +515,25 @@
     c.innerHTML = '<div class="tips-grid">' + sorted.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
   }
 
+  function getSelectionHTML(t) {
+    if (!t.predictions || !t.predictions.length) return '';
+    const lines = t.predictions.map(p => {
+      const key = (p.home||'').toLowerCase().trim() + '|' + (p.away||'').toLowerCase().trim();
+      const m = scores[key];
+      let status = '⏳', cls = 'sel-pend';
+      if (m && (m.status === 'finished' || (m.home_score != null && m.away_score != null && m.status !== 'live'))) {
+        const homeWon = m.home_score > m.away_score;
+        const awayWon = m.away_score > m.home_score;
+        const draw = m.home_score === m.away_score;
+        const correct = (p.pick === '1' && homeWon) || (p.pick === '2' && awayWon) || (p.pick === 'X' && draw);
+        status = correct ? '✅ Won' : '❌ Lost';
+        cls = correct ? 'sel-won' : 'sel-lost';
+      }
+      return '<div class="sel-row ' + cls + '"><span class="sel-match">' + esc(p.home) + ' vs ' + esc(p.away) + '</span><span class="sel-pick">' + (p.pick==='1'?'1':p.pick==='2'?'2':'X') + '</span><span class="sel-status">' + status + '</span></div>';
+    }).join('');
+    return '<div class="selections-box"><div class="sel-header">📋 Selections</div>' + lines + '</div>';
+  }
+
   function cardHTML(t, id, i) {
     const d = new Date(t.date), ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     const n = t.note ? `<div class="tip-note">${esc(t.note)}</div>` : '';
@@ -508,6 +564,7 @@
           </select>
         </div>
         ${n}
+        ${getSelectionHTML(t)}
         <div class="comments-section">
           <button class="comments-toggle" onclick="toggleComments('${id}',this)">💬 <span id="cc-${id}">0</span> comments</button>
           <div class="comments-list" id="cl-${id}"></div>
@@ -516,18 +573,41 @@
       <div class="tip-card-footer">
         <button class="btn btn-sm btn-so" onclick="editTip('${id}')">✏️ Edit</button>
         <button class="btn btn-sm btn-so" onclick="downloadPoster('${id}')">📸 Poster</button>
+        <button class="btn btn-sm btn-so" onclick="autoMarkResult('${id}')">🎯 Auto-Mark</button>
         <button class="btn btn-sm btn-danger" onclick="confirmDelete('${id}')">🗑 Delete</button>
       </div>
     </div>`;
   }
 
-  function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+  async function autoMarkResult(id) {
+    const t = tips.find(x => x.id === id);
+    if (!t || !t.predictions || !t.predictions.length) { showToast('No predictions to check', 'error'); return; }
+    const preds = t.predictions;
+    let allResolved = true, anyLost = false;
+    for (const p of preds) {
+      const key = (p.home||'').toLowerCase().trim() + '|' + (p.away||'').toLowerCase().trim();
+      const m = scores[key];
+      if (!m || m.status !== 'finished') { allResolved = false; continue; }
+      const homeWon = m.home_score > m.away_score;
+      const awayWon = m.away_score > m.home_score;
+      const draw = m.home_score === m.away_score;
+      const correct = (p.pick === '1' && homeWon) || (p.pick === '2' && awayWon) || (p.pick === 'X' && draw);
+      if (!correct) anyLost = true;
+    }
+    if (!allResolved) { showToast('Not all matches finished yet', 'error'); return; }
+    const newResult = anyLost ? 'lost' : 'won';
+    const r = await updateTip(id, { result: newResult });
+    if (r) { showToast('Auto-marked as ' + newResult.toUpperCase() + '!', 'success'); await fetchTips(); }
+  }
+
+  function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
 
   function exportCSV() {
     if (!tips.length) { showToast('No tips to export', 'error'); return; }
-    const headers = 'Name,Date,Company,Code,Odds,Result,Category,Confidence,Stake,Featured,HomeTeam,AwayTeam,Note,Created';
+    const headers = 'Name,Date,Company,Code,Odds,Result,Category,Confidence,Stake,Featured,HomeTeam,AwayTeam,Predictions,Note,Created';
     const rows = tips.map(t => {
-      const vals = [t.name, t.date, t.company, t.code, t.odds, t.result||'pending', t.category||'other', t.confidence||3, t.stake||0, t.featured?'Yes':'No', t.home_team||'', t.away_team||'', (t.note||'').replace(/,/g,';'), t.created];
+      const preds = (t.predictions||[]).map(p => p.home+' vs '+p.away+' ('+p.pick+')').join('; ');
+      const vals = [t.name, t.date, t.company, t.code, t.odds, t.result||'pending', t.category||'other', t.confidence||3, t.stake||0, t.featured?'Yes':'No', t.home_team||'', t.away_team||'', preds, (t.note||'').replace(/,/g,';'), t.created];
       return '"' + vals.join('","') + '"';
     });
     const csv = headers + '\n' + rows.join('\n');
@@ -552,6 +632,7 @@
     document.getElementById('tipHomeTeam').value = t.home_team || '';
     document.getElementById('tipAwayTeam').value = t.away_team || '';
     document.getElementById('tipNote').value = t.note || '';
+    document.getElementById('tipPredictions').value = (t.predictions || []).map(p => p.home + ' | ' + p.away + ' | ' + p.pick).join('\n');
     editingId = id;
     document.getElementById('submitBtn').textContent = '💾 Update Tip';
     document.getElementById('formTitle').textContent = '✏️ Edit Tip';
@@ -603,10 +684,15 @@
     const home_team = document.getElementById('tipHomeTeam').value.trim();
     const away_team = document.getElementById('tipAwayTeam').value.trim();
     const note = document.getElementById('tipNote').value.trim();
+    const predText = document.getElementById('tipPredictions').value.trim();
+    const predictions = predText ? predText.split('\n').filter(l => l.trim()).map(l => {
+      const parts = l.split('|').map(s => s.trim());
+      return { home: parts[0] || '', away: parts[1] || '', pick: (parts[2] || '').toUpperCase() };
+    }).filter(p => p.home && p.away && ['1','2','X'].includes(p.pick)) : [];
     if (!name || !date || !company || !code) { showToast('Fill all required fields', 'error'); return; }
     const btn = document.getElementById('submitBtn');
     btn.textContent = '⏳ Saving...'; btn.disabled = true;
-    const payload = { name, date, company, code, odds, category, confidence: parseInt(confidence), result, stake: parseFloat(stake) || 0, featured, note, home_team, away_team };
+    const payload = { name, date, company, code, odds, category, confidence: parseInt(confidence), result, stake: parseFloat(stake) || 0, featured, note, home_team, away_team, predictions };
     if (editingId) {
       const r = await updateTip(editingId, payload);
       if (r) { resetForm(); await fetchTips(); showToast('Tip updated! ✓', 'success'); }
@@ -639,6 +725,7 @@
     document.getElementById('tipDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('tipHomeTeam').value = '';
     document.getElementById('tipAwayTeam').value = '';
+    document.getElementById('tipPredictions').value = '';
     document.getElementById('formTitle').textContent = '✏️ Post a Tip';
     editingId = null;
   }
@@ -921,9 +1008,9 @@
 
   // Load gallery & analytics on login
   const origLogin = login;
-  login = function() { origLogin(); loadGallery(); loadAnalytics(); loadLinks(); };
+  login = function() { origLogin(); loadGallery(); loadAnalytics(); loadLinks(); fetchLiveScores(); };
   const origFetchTips = fetchTips;
-  fetchTips = function() { origFetchTips(); if (adminToken) { loadGallery(); loadAnalytics(); loadLinks(); } };
+  fetchTips = function() { origFetchTips(); if (adminToken) { loadGallery(); loadAnalytics(); loadLinks(); } fetchLiveScores(); };
 
   function showToast(m, type) {
     const e = document.getElementById('toast'); e.textContent = m;

@@ -105,6 +105,20 @@
 
     .tip-note { margin-top: 10px; padding: 10px 14px; background: var(--200); border-radius: var(--rs); font-size: 13px; color: var(--600); line-height: 1.6; border-left: 3px solid var(--sea-light); }
 
+    .selections-box { margin-top: 10px; border: 1px solid var(--200); border-radius: var(--rs); overflow: hidden; font-size: 12px; }
+    .sel-header { padding: 8px 12px; background: var(--100); font-weight: 700; color: var(--700); font-size: 11px; text-transform: uppercase; letter-spacing: .3px; border-bottom: 1px solid var(--200); }
+    .sel-row { display: flex; align-items: center; padding: 7px 12px; border-bottom: 1px solid var(--100); gap: 8px; }
+    .sel-row:last-child { border-bottom: none; }
+    .sel-match { flex: 1; color: var(--700); font-weight: 500; }
+    .sel-score { font-size: 11px; color: var(--500); margin-left: 4px; }
+    .sel-pick { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px; background: var(--200); color: var(--600); min-width: 24px; text-align: center; }
+    .sel-status { font-size: 11px; font-weight: 700; min-width: 55px; text-align: right; }
+    .sel-won { background: rgba(34,197,94,.06); }
+    .sel-won .sel-status { color: #22c55e; }
+    .sel-lost { background: rgba(239,68,68,.06); }
+    .sel-lost .sel-status { color: #ef4444; }
+    .sel-pend .sel-status { color: var(--400); }
+
     .comments-section { margin-top: 10px; border-top: 1px solid var(--100); padding-top: 10px; }
     .comments-toggle { background: none; border: none; color: var(--500); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; min-height: 36px; }
     .comments-toggle:hover { color: var(--sea); }
@@ -409,6 +423,26 @@
     return '<div class="score-badge ' + cls + '">' + icon + ' ' + esc(t.home_team||'?') + ' ' + sc + ' ' + esc(t.away_team||'?') + ' <span style="font-size:10px;opacity:.7">' + status + '</span></div>';
   }
 
+  function getSelectionHTML(t) {
+    if (!t.predictions || !t.predictions.length) return '';
+    const lines = t.predictions.map(p => {
+      const key = (p.home||'').toLowerCase().trim() + '|' + (p.away||'').toLowerCase().trim();
+      const m = scores[key];
+      let status = '⏳', cls = 'sel-pend';
+      if (m && (m.status === 'finished' || (m.home_score != null && m.away_score != null && m.status !== 'live'))) {
+        const homeWon = m.home_score > m.away_score;
+        const awayWon = m.away_score > m.home_score;
+        const draw = m.home_score === m.away_score;
+        const correct = (p.pick === '1' && homeWon) || (p.pick === '2' && awayWon) || (p.pick === 'X' && draw);
+        status = correct ? '✅ Won' : '❌ Lost';
+        cls = correct ? 'sel-won' : 'sel-lost';
+      }
+      const sc = (m && m.home_score != null && m.away_score != null) ? m.home_score + '-' + m.away_score : '';
+      return '<div class="sel-row ' + cls + '"><span class="sel-match">' + esc(p.home) + ' vs ' + esc(p.away) + (sc ? ' <span class="sel-score">' + sc + '</span>' : '') + '</span><span class="sel-pick">' + (p.pick==='1'?'1':p.pick==='2'?'2':'X') + '</span><span class="sel-status">' + status + '</span></div>';
+    }).join('');
+    return '<div class="selections-box"><div class="sel-header">📋 Selections</div>' + lines + '</div>';
+  }
+
   function cardHTML(t, id, i) {
     const d = new Date(t.date);
     const ds = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
@@ -433,6 +467,7 @@
         ${od}${stk}
         <div class="tip-row"><span class="tip-label">🔑 Code</span><div class="code-wrap"><span class="tip-value code">${esc(t.code)}</span><button class="copy-btn" onclick="copyCode('${esc(t.code)}',this,'${id}')" title="Copy code">📋</button></div></div>
         ${n}
+        ${getSelectionHTML(t)}
         <div class="comments-section">
           <button class="comments-toggle" onclick="toggleComments('${id}', this)">💬 <span id="cc-${id}">0</span> comments</button>
           <div class="comments-list" id="cl-${id}">
