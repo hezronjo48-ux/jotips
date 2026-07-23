@@ -288,7 +288,7 @@
         updateStats();
         filterTips();
       }
-      document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+
     } catch(e) {
       c.innerHTML = '<div class="error-state"><div class="icon">⚠️</div><h3>Could not load tips</h3><p>Server is offline. Try again later.</p><button class="btn btn-sea" onclick="loadTips()">Retry</button></div>';
     }
