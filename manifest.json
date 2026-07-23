@@ -1,0 +1,11 @@
+{
+  "name": "JOTIPS - Betting Tips",
+  "short_name": "JOTIPS",
+  "description": "Free betting tips & predictions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1428",
+  "theme_color": "#006994",
+  "orientation": "portrait",
+  "icons": []
+}

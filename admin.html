@@ -293,27 +293,45 @@
       <div class="section-header">
         <div class="section-title">📊 Analytics</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px" id="analyticsGrid">
-        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
-          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statViews">-</div>
-          <div style="font-size:12px;color:var(--400);margin-top:4px">Page Views</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px" id="analyticsGrid">
+        <div style="background:var(--100);border-radius:var(--rs);padding:18px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:26px;font-weight:800;color:var(--sea-light)" id="statViews">-</div>
+          <div style="font-size:11px;color:var(--400);margin-top:3px">Page Views</div>
         </div>
-        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
-          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statTips">-</div>
-          <div style="font-size:12px;color:var(--400);margin-top:4px">Tips Posted</div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:18px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:26px;font-weight:800;color:var(--sea-light)" id="statTips">-</div>
+          <div style="font-size:11px;color:var(--400);margin-top:3px">Tips Posted</div>
         </div>
-        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
-          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statComments">-</div>
-          <div style="font-size:12px;color:var(--400);margin-top:4px">Comments</div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:18px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:26px;font-weight:800;color:#4ade80" id="statWon">-</div>
+          <div style="font-size:11px;color:var(--400);margin-top:3px">Won ✅</div>
         </div>
-        <div style="background:var(--100);border-radius:var(--rs);padding:20px;text-align:center;border:1px solid var(--200)">
-          <div style="font-size:28px;font-weight:800;color:var(--sea-light)" id="statImages">-</div>
-          <div style="font-size:12px;color:var(--400);margin-top:4px">Images</div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:18px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:26px;font-weight:800;color:#f87171" id="statLost">-</div>
+          <div style="font-size:11px;color:var(--400);margin-top:3px">Lost ❌</div>
+        </div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:18px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:26px;font-weight:800;color:#fbbf24" id="statRate">-</div>
+          <div style="font-size:11px;color:var(--400);margin-top:3px">Win Rate</div>
+        </div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:18px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:26px;font-weight:800;color:var(--sea-light)" id="statComments">-</div>
+          <div style="font-size:11px;color:var(--400);margin-top:3px">Comments</div>
+        </div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:18px;text-align:center;border:1px solid var(--200)">
+          <div style="font-size:26px;font-weight:800;color:var(--sea-light)" id="statImages">-</div>
+          <div style="font-size:11px;color:var(--400);margin-top:3px">Images</div>
         </div>
       </div>
-      <div style="margin-top:16px;background:var(--100);border-radius:var(--rs);padding:16px;border:1px solid var(--200)">
-        <div style="font-size:13px;font-weight:600;color:var(--700);margin-bottom:8px">🔥 Most Used Tips</div>
-        <div id="topTips" style="font-size:13px;color:var(--500)">Loading...</div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--100);border-radius:var(--rs);padding:16px;border:1px solid var(--200)">
+          <div style="font-size:13px;font-weight:600;color:var(--700);margin-bottom:8px">🔥 Most Used Tips</div>
+          <div id="topTips" style="font-size:13px;color:var(--500)">Loading...</div>
+        </div>
+        <div style="background:var(--100);border-radius:var(--rs);padding:16px;border:1px solid var(--200)">
+          <div style="font-size:13px;font-weight:600;color:var(--700);margin-bottom:8px">📊 Win / Loss</div>
+          <div id="winLossBar" style="font-size:13px;color:var(--500)">Loading...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -729,8 +747,25 @@
       const a = await r.json();
       document.getElementById('statViews').textContent = a.views || 0;
       document.getElementById('statTips').textContent = tips.length;
+      const won = tips.filter(t => t.result === 'won').length;
+      const lost = tips.filter(t => t.result === 'lost').length;
+      document.getElementById('statWon').textContent = won;
+      document.getElementById('statLost').textContent = lost;
+      const rate = (won + lost) > 0 ? Math.round(won / (won + lost) * 100) + '%' : '-';
+      document.getElementById('statRate').textContent = rate;
       document.getElementById('statComments').textContent = '...';
       document.getElementById('statImages').textContent = document.querySelectorAll('#galleryGrid .gallery-item').length || 0;
+      // Win/Loss bar
+      const total = won + lost;
+      if (total > 0) {
+        const wp = Math.round(won / total * 100);
+        document.getElementById('winLossBar').innerHTML =
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="color:#4ade80;font-weight:700">' + won + ' Won</span><span style="color:var(--400)">|</span><span style="color:#f87171;font-weight:700">' + lost + ' Lost</span></div>' +
+          '<div style="height:10px;background:var(--200);border-radius:5px;overflow:hidden"><div style="height:100%;width:' + wp + '%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:5px;transition:width .6s ease"></div></div>' +
+          '<div style="text-align:right;font-size:11px;color:var(--400);margin-top:4px">' + rate + ' win rate</div>';
+      } else {
+        document.getElementById('winLossBar').innerHTML = '<span style="color:var(--400)">No results recorded yet</span>';
+      }
       // Most used tips
       if (a.tipViews && Object.keys(a.tipViews).length) {
         const sorted = Object.entries(a.tipViews).sort((a,b) => b[1] - a[1]).slice(0, 5);

@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
   <title>JOTIPS - Betting Tips & Predictions</title>
+  <meta name="description" content="Free betting tips, predictions, and betting codes. Win with JOTIPS.">
+  <meta property="og:title" content="JOTIPS - Betting Tips">
+  <meta property="og:description" content="Free betting tips & predictions">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#006994">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -26,152 +32,155 @@
 
     .header { background: var(--grad); color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-lg); }
     .header-inner { max-width: 1200px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
-    .logo { font-size: 26px; font-weight: 900; letter-spacing: -.5px; }
+    .logo { font-size: 26px; font-weight: 900; letter-spacing: -.5px; display: flex; align-items: center; gap: 8px; }
     .logo span { font-weight: 400; font-size: 13px; opacity: .65; }
     .header-right { display: flex; align-items: center; gap: 14px; }
     .live-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.15); padding: 4px 12px; border-radius: 20px; }
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse-dot 1.5s ease-in-out infinite; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 
-    .hero { background: var(--grad-dark); color: #fff; text-align: center; padding: 40px 20px 36px; position: relative; overflow: hidden; }
+    .hero { background: var(--grad-dark); color: #fff; text-align: center; padding: 32px 20px 28px; position: relative; overflow: hidden; }
     .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 50%, rgba(255,255,255,.08) 0%, transparent 60%), radial-gradient(circle at 70% 50%, rgba(255,255,255,.05) 0%, transparent 50%); }
-    .hero h1 { font-size: 28px; font-weight: 800; position: relative; }
+    .hero h1 { font-size: 26px; font-weight: 800; position: relative; }
     .hero h1 span { color: rgba(255,255,255,.5); font-weight: 400; }
-    .hero p { font-size: 14px; opacity: .7; margin-top: 6px; position: relative; }
+    .hero p { font-size: 14px; opacity: .7; margin-top: 4px; position: relative; }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px 20px; }
 
-    .controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
-    .controls-left { display: flex; align-items: center; gap: 10px; }
-    .section-title { font-size: 20px; font-weight: 800; color: var(--sea-dark); }
-    .tip-count-badge { font-size: 12px; font-weight: 600; background: var(--100); color: var(--500); padding: 2px 10px; border-radius: 20px; }
-    .controls-right { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--400); }
-    .controls-right button { background: none; border: none; cursor: pointer; color: var(--sea); font-size: 16px; padding: 4px; transition: var(--tr); }
-    .controls-right button:hover { transform: rotate(60deg); }
+    /* Stats bar */
+    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .stat-card { background: var(--100); border: 1px solid var(--200); border-radius: var(--rs); padding: 14px 12px; text-align: center; }
+    .stat-card .num { font-size: 22px; font-weight: 800; }
+    .stat-card .num.green { color: #4ade80; } .stat-card .num.red { color: #f87171; } .stat-card .num.blue { color: var(--sea-light); }
+    .stat-card .label { font-size: 10px; color: var(--400); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
 
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: var(--rs); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--tr); text-decoration: none; }
+    /* Controls */
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
+    .search-box { flex: 1; min-width: 180px; padding: 10px 14px; border: 2px solid var(--200); border-radius: var(--rs); font-family: inherit; font-size: 14px; outline: none; background: var(--100); color: var(--800); transition: var(--tr); }
+    .search-box:focus { border-color: var(--sea); }
+    .filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .filter-tab { padding: 7px 14px; border: 1px solid var(--200); border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; background: var(--100); color: var(--500); transition: var(--tr); font-family: inherit; white-space: nowrap; }
+    .filter-tab:hover { border-color: var(--400); color: var(--700); }
+    .filter-tab.active { background: var(--grad); color: #fff; border-color: transparent; }
+    .filter-tab .count { margin-left: 4px; font-size: 10px; opacity: .7; }
+
+    .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border: none; border-radius: var(--rs); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--tr); text-decoration: none; }
     .btn-sea { background: var(--grad); color: #fff; } .btn-sea:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
     .btn-sea-outline { background: transparent; color: var(--sea); border: 2px solid var(--sea); } .btn-sea-outline:hover { background: var(--sea); color: #fff; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    .btn-xs { padding: 5px 10px; font-size: 11px; border-radius: 7px; }
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+    .btn-xs { padding: 4px 10px; font-size: 11px; border-radius: 7px; }
 
-    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
 
-    .tip-card { background: var(--100); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; transition: var(--tr); opacity: 0; transform: translateY(20px); animation: card-in .5s ease forwards; }
-    .tip-card:hover { transform: translateY(-4px) !important; box-shadow: var(--shadow-xl); }
+    .tip-card { background: var(--100); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; transition: var(--tr); opacity: 0; transform: translateY(20px); animation: card-in .45s ease forwards; }
+    .tip-card:hover { transform: translateY(-3px) !important; box-shadow: var(--shadow-xl); }
     @keyframes card-in { to { opacity: 1; transform: translateY(0); } }
-    .tip-card:nth-child(1) { animation-delay: .05s; } .tip-card:nth-child(2) { animation-delay: .1s; }
-    .tip-card:nth-child(3) { animation-delay: .15s; } .tip-card:nth-child(4) { animation-delay: .2s; }
-    .tip-card:nth-child(5) { animation-delay: .25s; } .tip-card:nth-child(6) { animation-delay: .3s; }
-    .tip-card:nth-child(7) { animation-delay: .35s; } .tip-card:nth-child(8) { animation-delay: .4s; }
-    .tip-card:nth-child(n+9) { animation-delay: .45s; }
 
-    .tip-card-header { background: var(--grad); color: #fff; padding: 18px 22px; position: relative; overflow: hidden; }
+    .tip-card-header { background: var(--grad); color: #fff; padding: 16px 20px; position: relative; overflow: hidden; }
     .tip-card-header::after { content: ''; position: absolute; top: -50%; right: -20%; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.06); }
-    .tip-card-header .tip-name { font-size: 17px; font-weight: 700; line-height: 1.35; position: relative; padding-right: 90px; }
-    .tip-card-header .tip-date { font-size: 12px; opacity: .75; margin-top: 5px; display: flex; align-items: center; gap: 5px; position: relative; }
+    .tip-card-header .tip-name { font-size: 16px; font-weight: 700; line-height: 1.35; position: relative; padding-right: 85px; }
+    .tip-card-header .tip-date { font-size: 12px; opacity: .75; margin-top: 4px; display: flex; align-items: center; gap: 5px; position: relative; }
 
-    .result-badge { position: absolute; top: 16px; right: 18px; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: .5px; }
+    .result-badge { position: absolute; top: 14px; right: 16px; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: .5px; }
     .result-badge.pending { background: rgba(255,255,255,.15); color: rgba(255,255,255,.8); }
     .result-badge.won { background: #166534; color: #bbf7d0; }
     .result-badge.lost { background: #991b1b; color: #fecaca; }
 
-    .tip-card-body { padding: 18px 22px; }
-    .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--100); gap: 12px; }
+    .tip-card-body { padding: 16px 20px; }
+    .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--100); gap: 10px; }
     .tip-row:last-of-type { border-bottom: none; }
-    .tip-label { font-size: 11px; font-weight: 600; color: var(--400); text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; }
+    .tip-label { font-size: 11px; font-weight: 600; color: var(--400); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
     .tip-value { font-size: 14px; font-weight: 600; color: var(--800); text-align: right; word-break: break-all; }
 
-    .code-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
-    .tip-value.code { font-family: 'Courier New', monospace; font-size: 16px; color: var(--sea-dark); font-weight: 800; letter-spacing: .3px; }
-    .copy-btn { background: none; border: none; cursor: pointer; color: var(--400); padding: 4px; font-size: 16px; transition: var(--tr); border-radius: 6px; flex-shrink: 0; }
+    .code-wrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+    .tip-value.code { font-family: 'Courier New', monospace; font-size: 15px; color: var(--sea-dark); font-weight: 800; letter-spacing: .2px; }
+    .copy-btn { background: none; border: none; cursor: pointer; color: var(--400); padding: 4px; font-size: 15px; transition: var(--tr); border-radius: 6px; flex-shrink: 0; min-width: 32px; min-height: 32px; }
     .copy-btn:hover { color: var(--sea); background: var(--50); }
     .copy-btn.copied { color: #22c55e; }
 
-    .tip-note { margin-top: 12px; padding: 10px 14px; background: var(--200); border-radius: var(--rs); font-size: 13px; color: var(--600); line-height: 1.6; border-left: 3px solid var(--sea-light); }
+    .tip-note { margin-top: 10px; padding: 10px 14px; background: var(--200); border-radius: var(--rs); font-size: 13px; color: var(--600); line-height: 1.6; border-left: 3px solid var(--sea-light); }
 
-    /* Comments */
-    .comments-section { margin-top: 12px; border-top: 1px solid var(--100); padding-top: 12px; }
-    .comments-toggle { background: none; border: none; color: var(--500); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 4px 0; }
+    .comments-section { margin-top: 10px; border-top: 1px solid var(--100); padding-top: 10px; }
+    .comments-toggle { background: none; border: none; color: var(--500); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; min-height: 36px; }
     .comments-toggle:hover { color: var(--sea); }
-    .comments-list { display: none; margin-top: 8px; }
+    .comments-list { display: none; margin-top: 6px; }
     .comments-list.open { display: block; }
-    .comment-item { padding: 8px 0; border-bottom: 1px solid var(--100); font-size: 13px; }
+    .comment-item { padding: 6px 0; border-bottom: 1px solid var(--100); font-size: 13px; }
     .comment-item:last-child { border-bottom: none; }
     .comment-author { font-weight: 600; color: var(--700); font-size: 12px; }
     .comment-text { color: var(--600); margin-top: 2px; }
     .comment-time { font-size: 11px; color: var(--400); margin-top: 2px; }
-    .no-comments { font-size: 12px; color: var(--400); padding: 8px 0; }
+    .no-comments { font-size: 12px; color: var(--400); padding: 6px 0; }
 
-    .comment-form { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-    .comment-form input, .comment-form textarea { padding: 8px 10px; border: 2px solid var(--200); border-radius: 6px; font-family: inherit; font-size: 12px; outline: none; transition: var(--tr); }
+    .comment-form { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+    .comment-form input, .comment-form textarea { padding: 8px 10px; border: 2px solid var(--200); border-radius: 6px; font-family: inherit; font-size: 13px; outline: none; transition: var(--tr); background: var(--50); color: var(--800); }
     .comment-form input:focus, .comment-form textarea:focus { border-color: var(--sea); }
-    .comment-form textarea { resize: vertical; min-height: 40px; }
+    .comment-form textarea { resize: vertical; min-height: 36px; }
     .comment-form .row { display: flex; gap: 6px; }
     .comment-form .row input { flex: 1; }
     .comment-form .row .btn { flex-shrink: 0; }
 
-    .tip-card-footer { padding: 12px 22px; border-top: 1px solid var(--100); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .tip-card-footer { padding: 10px 20px; border-top: 1px solid var(--100); display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
 
-    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
     .skeleton { background: var(--100); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
-    .skeleton-head { height: 80px; background: linear-gradient(90deg, var(--100) 25%, var(--200) 50%, var(--100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-    .skeleton-body { padding: 18px 22px; }
-    .skeleton-line { height: 14px; border-radius: 8px; background: linear-gradient(90deg, var(--100) 25%, var(--200) 50%, var(--100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 12px; }
-    .skeleton-line:last-child { width: 60%; }
+    .skeleton-head { height: 75px; background: linear-gradient(90deg, var(--100) 25%, var(--200) 50%, var(--100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .skeleton-body { padding: 16px 20px; }
+    .skeleton-line { height: 13px; border-radius: 8px; background: linear-gradient(90deg, var(--100) 25%, var(--200) 50%, var(--100) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin-bottom: 10px; }
+    .skeleton-line:last-child { width: 55%; }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-    .empty-state, .error-state { text-align: center; padding: 80px 20px; }
-    .empty-state .icon, .error-state .icon { font-size: 56px; margin-bottom: 16px; opacity: .5; }
-    .empty-state h3, .error-state h3 { font-size: 20px; margin-bottom: 8px; color: var(--700); }
-    .empty-state p, .error-state p { font-size: 14px; color: var(--400); margin-bottom: 16px; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .empty-state, .error-state { text-align: center; padding: 60px 20px; }
+    .empty-state .icon, .error-state .icon { font-size: 48px; margin-bottom: 14px; opacity: .5; }
+    .empty-state h3, .error-state h3 { font-size: 18px; margin-bottom: 6px; color: var(--700); }
+    .empty-state p, .error-state p { font-size: 14px; color: var(--400); margin-bottom: 14px; max-width: 360px; margin-left: auto; margin-right: auto; }
 
-    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px) scale(.9); background: var(--800); color: #fff; padding: 12px 24px; border-radius: var(--rs); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); z-index: 300; pointer-events: none; }
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(100px) scale(.9); background: var(--800); color: #fff; padding: 12px 22px; border-radius: var(--rs); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-xl); opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); z-index: 300; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 
-    /* Slideshow */
-    .slider-wrap { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; overflow: hidden; border-radius: 0 0 var(--r) var(--r); }
-    .slider { position: relative; width: 100%; height: 260px; background: var(--200); overflow: hidden; border-radius: 0 0 var(--rs) var(--rs); }
-    .slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: var(--100); padding: 8px; opacity: 0; transition: opacity .8s ease; }
+    .slider-wrap { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; overflow: hidden; }
+    .slider { position: relative; width: 100%; height: 260px; background: var(--200); overflow: hidden; }
+    .slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: var(--100); padding: 6px; opacity: 0; transition: opacity .8s ease; }
     .slider img.active { opacity: 1; }
-    .slider-dots { display: flex; justify-content: center; gap: 8px; padding: 10px; position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,.4)); }
-    .slider-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: var(--tr); }
+    .slider-dots { display: flex; justify-content: center; gap: 7px; padding: 8px; position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,.4)); }
+    .slider-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: var(--tr); }
     .slider-dots span.active { background: #fff; transform: scale(1.3); }
     .slider-empty { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: var(--400); font-size: 14px; background: var(--200); }
 
-    /* Lightbox */
-    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 500; align-items: center; justify-content: center; cursor: pointer; }
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 500; align-items: center; justify-content: center; cursor: pointer; }
     .lightbox.open { display: flex; }
     .lightbox img { max-width: 90%; max-height: 90%; border-radius: 8px; }
-    .lightbox .close-lb { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 32px; cursor: pointer; background: none; border: none; }
+    .lightbox .close-lb { position: absolute; top: 18px; right: 24px; color: #fff; font-size: 30px; cursor: pointer; background: none; border: none; }
 
-    .back-top { position: fixed; bottom: 30px; right: 24px; width: 44px; height: 44px; border-radius: 50%; background: var(--grad); color: #fff; border: none; cursor: pointer; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(20px); transition: var(--tr); z-index: 99; font-size: 18px; }
+    .back-top { position: fixed; bottom: 24px; right: 20px; width: 42px; height: 42px; border-radius: 50%; background: var(--grad); color: #fff; border: none; cursor: pointer; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(20px); transition: var(--tr); z-index: 99; font-size: 18px; display: flex; align-items: center; justify-content: center; }
     .back-top.visible { opacity: 1; transform: translateY(0); }
     .back-top:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl); }
 
-    .footer { text-align: center; padding: 32px 20px; color: var(--400); font-size: 13px; border-top: 1px solid var(--200); margin-top: 40px; }
+    .footer { text-align: center; padding: 28px 20px; color: var(--400); font-size: 13px; border-top: 1px solid var(--200); margin-top: 36px; }
     .footer a { color: var(--sea); text-decoration: none; }
+    .footer .views { font-size: 11px; opacity: .6; margin-top: 4px; }
 
-    ::-webkit-scrollbar { width: 7px; } ::-webkit-scrollbar-track { background: var(--100); } ::-webkit-scrollbar-thumb { background: var(--300); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: var(--400); }
-
-    #linksContainer a { min-height: 44px; }
-    .comments-toggle, .copy-btn, .btn { min-height: 40px; min-width: 40px; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--100); } ::-webkit-scrollbar-thumb { background: var(--300); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: var(--400); }
+    #linksContainer a { min-height: 40px; }
     input, textarea, select { font-size: 16px; }
 
     @media (max-width: 640px) {
-      .hero h1 { font-size: 22px; } .hero { padding: 28px 16px 24px; }
-      .container { padding: 20px 12px; }
-      .logo { font-size: 22px; } .logo span { font-size: 12px; }
-      .section-title { font-size: 17px; }
+      .hero h1 { font-size: 20px; } .hero { padding: 24px 16px 20px; }
+      .container { padding: 16px 12px; }
+      .logo { font-size: 20px; } .logo span { font-size: 11px; }
+      .section-title { font-size: 16px; }
       .tips-grid { grid-template-columns: 1fr; }
       .skeleton-grid { grid-template-columns: 1fr; }
-      .header-inner { padding: 12px 16px; }
-      .tip-card-header .tip-name { font-size: 15px; padding-right: 70px; }
-      .result-badge { font-size: 10px; padding: 3px 8px; top: 12px; right: 12px; }
-      .tip-card-body { padding: 14px 16px; }
-      .tip-card-header { padding: 14px 16px; }
-      .tip-card-footer { padding: 10px 16px; }
+      .header-inner { padding: 10px 14px; }
+      .tip-card-header .tip-name { font-size: 14px; padding-right: 65px; }
+      .result-badge { font-size: 9px; padding: 2px 8px; top: 10px; right: 10px; }
+      .tip-card-body { padding: 12px 14px; }
+      .tip-card-header { padding: 12px 14px; }
+      .tip-card-footer { padding: 8px 14px; }
       .slider { height: 180px; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .stat-card .num { font-size: 18px; }
+      .filter-tab { font-size: 11px; padding: 6px 10px; }
     }
   </style>
 </head>
@@ -198,35 +207,42 @@
   <div class="slider-dots" id="sliderDots"></div>
 </div>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="close-lb">&times;</button>
   <img id="lbImg" src="" alt="">
 </div>
 
 <div id="linksSection" style="display:none;max-width:1200px;margin:0 auto;padding:16px 20px 0">
-  <div style="font-size:13px;font-weight:600;color:var(--500);margin-bottom:8px">🔗 Betting Companies</div>
-  <div id="linksContainer" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  <div style="font-size:12px;font-weight:600;color:var(--500);margin-bottom:6px">🔗 Betting Companies</div>
+  <div id="linksContainer" style="display:flex;flex-wrap:wrap;gap:6px"></div>
 </div>
 
 <div class="container">
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card"><div class="num blue" id="statTotal">0</div><div class="label">Total Tips</div></div>
+    <div class="stat-card"><div class="num green" id="statWon">0</div><div class="label">Won ✅</div></div>
+    <div class="stat-card"><div class="num red" id="statLost">0</div><div class="label">Lost ❌</div></div>
+    <div class="stat-card"><div class="num blue" id="statRate">0%</div><div class="label">Win Rate</div></div>
+  </div>
+
   <div class="controls">
-    <div class="controls-left">
-      <h2 class="section-title">All Tips</h2>
-      <span class="tip-count-badge" id="tipCount">0</span>
-    </div>
-    <div class="controls-right">
-      <span id="lastUpdated">Just now</span>
-      <button onclick="loadTips()" title="Refresh">↻</button>
+    <input type="text" class="search-box" id="searchBox" placeholder="Search by company, name, or code..." oninput="filterTips()">
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all" onclick="setFilter('all',this)">All <span class="count" id="countAll">0</span></button>
+      <button class="filter-tab" data-filter="won" onclick="setFilter('won',this)">✅ Won <span class="count" id="countWon">0</span></button>
+      <button class="filter-tab" data-filter="lost" onclick="setFilter('lost',this)">❌ Lost <span class="count" id="countLost">0</span></button>
+      <button class="filter-tab" data-filter="pending" onclick="setFilter('pending',this)">⏳ Pending <span class="count" id="countPending">0</span></button>
     </div>
   </div>
+
   <div id="tipsContainer"></div>
 </div>
 
 <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <div class="footer">
-  JOTIPS &mdash; Betting Tips & Predictions &bull; <a href="/admin.html" target="_blank">Admin</a>
+  JOTIPS &mdash; Betting Tips &bull; <a href="/admin.html" target="_blank">Admin</a>
+  <div class="views" id="viewCount"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -234,7 +250,7 @@
 <script>
   const API = window.location.origin + '/api/tips';
   const COMMENT_API = window.location.origin + '/api/comments';
-  let tips = [];
+  let tips = [], currentFilter = 'all', currentSearch = '';
 
   async function loadTips() {
     const c = document.getElementById('tipsContainer');
@@ -243,18 +259,59 @@
     ).join('') + '</div>';
     try {
       const r = await fetch(API);
-      if (!r.ok) throw Error('HTTP ' + r.status);
+      if (!r.ok) throw Error();
       tips = await r.json();
       if (!tips.length) {
         c.innerHTML = '<div class="empty-state"><div class="icon">🏀</div><h3>No tips yet</h3><p>Check back later for the latest betting tips and predictions</p></div>';
       } else {
-        c.innerHTML = '<div class="tips-grid">' + tips.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
+        updateStats();
+        filterTips();
       }
-      document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
-      document.getElementById('tipCount').textContent = tips.length;
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
     } catch(e) {
       c.innerHTML = '<div class="error-state"><div class="icon">⚠️</div><h3>Could not load tips</h3><p>Server is offline. Try again later.</p><button class="btn btn-sea" onclick="loadTips()">Retry</button></div>';
     }
+  }
+
+  function updateStats() {
+    const total = tips.length;
+    const won = tips.filter(t => t.result === 'won').length;
+    const lost = tips.filter(t => t.result === 'lost').length;
+    const rate = total > 0 ? Math.round((won / (won + lost)) * 100) : 0;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statWon').textContent = won;
+    document.getElementById('statLost').textContent = lost;
+    document.getElementById('statRate').textContent = (won + lost) > 0 ? rate + '%' : '-';
+    document.getElementById('countAll').textContent = total;
+    document.getElementById('countWon').textContent = won;
+    document.getElementById('countLost').textContent = lost;
+    document.getElementById('countPending').textContent = tips.filter(t => (t.result||'pending') === 'pending').length;
+    document.getElementById('tipCount').textContent = total;
+  }
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    filterTips();
+  }
+
+  function filterTips() {
+    currentSearch = document.getElementById('searchBox').value.toLowerCase().trim();
+    let filtered = tips.filter(t => {
+      if (currentFilter !== 'all' && (t.result || 'pending') !== currentFilter) return false;
+      if (currentSearch) {
+        const searchable = (t.name + ' ' + t.company + ' ' + t.code).toLowerCase();
+        if (searchable.indexOf(currentSearch) === -1) return false;
+      }
+      return true;
+    });
+    const c = document.getElementById('tipsContainer');
+    if (!filtered.length) {
+      c.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>No tips match</h3><p>Try a different search or filter</p></div>';
+      return;
+    }
+    c.innerHTML = '<div class="tips-grid">' + filtered.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
   }
 
   function cardHTML(t, id, i) {
@@ -264,7 +321,9 @@
     const od = t.odds ? `<div class="tip-row"><span class="tip-label">🎯 Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">@ ${esc(t.odds)}</span></div>` : '';
     const result = t.result || 'pending';
     const badge = { pending: '⏳ Pending', won: '✅ Won', lost: '❌ Lost' };
-    return `<div class="tip-card" style="animation-delay:${Math.min(i * .05, .4)}s">
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(`💰 ${t.name} - ${t.company}\nCode: ${t.code}\nOdds: ${t.odds || '-'}\nvia JOTIPS`);
+    return `<div class="tip-card" style="animation-delay:${Math.min(i * .04, .35)}s">
       <div class="tip-card-header">
         <div class="tip-name">${esc(t.name)} <span class="result-badge ${result}">${badge[result]}</span></div>
         <div class="tip-date">📅 ${ds}</div>
@@ -289,7 +348,8 @@
         </div>
       </div>
       <div class="tip-card-footer">
-        <button class="btn btn-sm btn-sea-outline" onclick="downloadPoster('${id}')">📸 Poster</button>
+        <a href="https://wa.me/?text=${text}" target="_blank" rel="noopener" class="btn btn-xs btn-sea-outline" title="Share on WhatsApp">📱 Share</a>
+        <button class="btn btn-xs btn-sea-outline" onclick="downloadPoster('${id}')">📸 Poster</button>
       </div>
     </div>`;
   }
@@ -306,7 +366,6 @@
     }).catch(() => showToast('Could not copy'));
   }
 
-  // Comments
   async function toggleComments(tipId, btn) {
     const list = document.getElementById('cl-' + tipId);
     if (list.classList.contains('open')) { list.classList.remove('open'); return; }
@@ -362,12 +421,10 @@
     return days + 'd ago';
   }
 
-  // Scroll to top
   window.addEventListener('scroll', () => {
     document.getElementById('backTop').classList.toggle('visible', window.scrollY > 400);
   });
 
-  // Poster
   function downloadPoster(id) {
     const tip = findTip(id); if (!tip) return;
     const c = document.createElement('canvas'), x = c.getContext('2d');
@@ -427,7 +484,7 @@
     x.fillStyle = 'rgba(255,255,255,.25)'; x.font = '11px Inter, sans-serif'; x.textAlign = 'center';
     x.fillText('JOTIPS — Betting Tips & Predictions', w / 2, h - 30);
     const a = document.createElement('a');
-    a.download = `jotips-${tip.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}.png`;
+    a.download = 'jotips-' + tip.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30) + '.png';
     a.href = c.toDataURL('image/png'); a.click();
     showToast('Poster downloaded!');
   }
@@ -451,7 +508,6 @@
     clearTimeout(window._t); window._t = setTimeout(() => e.classList.remove('show'), 2500);
   }
 
-  // Slideshow
   let slideIndex = 0, slideTimer = null;
   async function loadSlider() {
     try {
@@ -460,7 +516,6 @@
       const files = await r.json();
       const slider = document.getElementById('slider');
       const dots = document.getElementById('sliderDots');
-      const empty = document.getElementById('sliderEmpty');
       if (!files.length) { slider.innerHTML = '<div class="slider-empty">No images yet</div>'; dots.innerHTML = ''; return; }
       slider.innerHTML = files.map((f, i) => `<img src="/uploads/${f}" class="${i === 0 ? 'active' : ''}" alt="" loading="lazy">`).join('');
       slider.onclick = function() { const img = this.querySelector('.active'); if (img) openLightbox(img.src); };
@@ -506,13 +561,10 @@
     document.getElementById('lightbox').classList.remove('open');
   }
 
-  // Track view
   fetch(window.location.origin + '/api/analytics/view', { method: 'POST' }).catch(() => {});
 
-  // Show view count
   fetch(window.location.origin + '/api/analytics').then(r => r.json()).then(a => {
-    const footer = document.querySelector('.footer');
-    if (a.views > 0) footer.innerHTML += '<br><span style="font-size:11px;opacity:.6">👁 ' + a.views + ' views</span>';
+    if (a.views > 0) document.getElementById('viewCount').textContent = '👁 ' + a.views + ' views';
   }).catch(() => {});
 
   async function loadLinks() {
@@ -525,7 +577,7 @@
       if (!links.length) { section.style.display = 'none'; return; }
       section.style.display = 'block';
       container.innerHTML = links.map(l =>
-        `<a href="${escAttr(l.url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:8px 16px;background:var(--100);border:1px solid var(--200);border-radius:var(--rs);font-size:13px;font-weight:600;color:var(--700);text-decoration:none;transition:var(--tr)">${esc(l.name)} ↗</a>`
+        `<a href="${escAttr(l.url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:7px 14px;background:var(--100);border:1px solid var(--200);border-radius:var(--rs);font-size:12px;font-weight:600;color:var(--700);text-decoration:none;transition:var(--tr)">${esc(l.name)} ↗</a>`
       ).join('');
     } catch(e) {}
   }
