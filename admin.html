@@ -225,23 +225,15 @@
       <div class="form-grid">
         <div class="form-group full">
           <label>📌 Name of the Tip</label>
-          <input type="text" id="tipName" placeholder="e.g. Manchester City vs Liverpool" required>
+          <input type="text" id="tipName" placeholder="e.g. 10-Match Accumulator" required>
+        </div>
+        <div class="form-group">
+          <label>🏢 Bet Company</label>
+          <input type="text" id="tipCompany" placeholder="e.g. Bet9ja, SportyBet" required>
         </div>
         <div class="form-group">
           <label>📅 Date</label>
           <input type="date" id="tipDate" required>
-        </div>
-        <div class="form-group">
-          <label>🏢 Betting Company</label>
-          <input type="text" id="tipCompany" placeholder="e.g. Bet9ja, SportyBet" required>
-        </div>
-        <div class="form-group">
-          <label>🎯 Total Odds</label>
-          <input type="text" id="tipOdds" placeholder="e.g. 3.50">
-        </div>
-        <div class="form-group">
-          <label>🔑 Betting Code</label>
-          <input type="text" id="tipCode" placeholder="e.g. 1X2-12345-ABCDE" required>
         </div>
         <div class="form-group">
           <label>🏷️ Category</label>
@@ -253,12 +245,23 @@
           </select>
         </div>
         <div class="form-group">
-          <label>🏠 Home Team <span style="font-weight:400;color:var(--400);font-size:12px">(for live score)</span></label>
-          <input type="text" id="tipHomeTeam" placeholder="e.g. Manchester United">
+          <label>🎯 Total Odds</label>
+          <input type="text" id="tipOdds" placeholder="e.g. 12.00">
         </div>
         <div class="form-group">
-          <label>✈️ Away Team <span style="font-weight:400;color:var(--400);font-size:12px">(for live score)</span></label>
-          <input type="text" id="tipAwayTeam" placeholder="e.g. Liverpool">
+          <label>🔑 Bet Code</label>
+          <input type="text" id="tipCode" placeholder="e.g. 1X2-12345-ABCDE" required>
+        </div>
+        <div class="form-group full">
+          <label>📋 Selection <span style="font-weight:400;color:var(--400);font-size:12px">(one per line: <b>HomeTeam vs AwayTeam | Prediction</b>)</span></label>
+          <textarea id="tipPredictions" rows="5" placeholder="Manchester United vs Liverpool | 1&#10;Barcelona vs Real Madrid | 2&#10;Chelsea vs Arsenal | X&#10;Tottenham vs Man City | GG&#10;Juventus vs AC Milan | O2.5" style="width:100%;padding:11px 14px;border:2px solid var(--200);border-radius:var(--rs);font-family:inherit;font-size:13px;outline:none;background:var(--50);color:var(--800);resize:vertical"></textarea>
+          <div style="font-size:11px;color:var(--400);margin-top:4px;line-height:1.6">
+            <b>Supported predictions:</b> <code>1</code> Home &bull; <code>2</code> Away &bull; <code>X</code> Draw &bull; <code>GG</code> Both Score &bull; <code>NG</code> No Goal &bull; <code>O2.5</code> Over &bull; <code>U2.5</code> Under
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>📝 Note <span style="font-weight:400;color:var(--400);font-size:12px">(optional)</span></label>
+          <textarea id="tipNote" placeholder="Additional details or analysis..."></textarea>
         </div>
         <div class="form-group">
           <label>⭐ Confidence</label>
@@ -271,14 +274,6 @@
           </select>
         </div>
         <div class="form-group">
-          <label>📊 Result</label>
-          <select id="tipResult">
-            <option value="pending">Pending</option>
-            <option value="won">Won ✅</option>
-            <option value="lost">Lost ❌</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>💰 Stake (KES)</label>
           <input type="number" id="tipStake" placeholder="e.g. 500" min="0" step="100">
         </div>
@@ -286,13 +281,13 @@
           <input type="checkbox" id="tipFeatured" style="width:18px;height:18px">
           <label for="tipFeatured" style="margin:0;cursor:pointer">🔥 Featured tip (appears first)</label>
         </div>
-        <div class="form-group full">
-          <label>📝 Note <span style="font-weight:400;color:var(--400);font-size:12px">(optional)</span></label>
-          <textarea id="tipNote" placeholder="Any additional details or predictions..."></textarea>
-        </div>
-        <div class="form-group full">
-          <label>📋 Selections <span style="font-weight:400;color:var(--400);font-size:12px">(one per line: <b>HomeTeam | AwayTeam | 1/2/X</b> — 1=Home, 2=Away, X=Draw)</span></label>
-          <textarea id="tipPredictions" rows="4" placeholder="Manchester United | Liverpool | 1&#10;Barcelona | Real Madrid | 2&#10;Chelsea | Arsenal | X" style="width:100%;padding:11px 14px;border:2px solid var(--200);border-radius:var(--rs);font-family:inherit;font-size:13px;outline:none;background:var(--50);color:var(--800);resize:vertical"></textarea>
+        <div class="form-group">
+          <label>📊 Result <span style="font-weight:400;color:var(--400);font-size:12px">(auto-calculated from Selection)</span></label>
+          <select id="tipResult" style="background:var(--50)">
+            <option value="pending">⏳ Pending</option>
+            <option value="won">✅ Won</option>
+            <option value="lost">❌ Lost</option>
+          </select>
         </div>
       </div>
       <div class="form-actions">
@@ -319,7 +314,7 @@
       <div class="section-header">
         <div class="section-title">📦 Bulk Import</div>
       </div>
-      <p style="font-size:13px;color:var(--400);margin-bottom:8px">Paste tips in format: <code style="background:var(--200);padding:2px 6px;border-radius:4px">Name | Date | Company | Code | Odds | Category | HomeTeam | AwayTeam</code> (one per line)</p>
+      <p style="font-size:13px;color:var(--400);margin-bottom:8px">Paste tips in format: <code style="background:var(--200);padding:2px 6px;border-radius:4px">Name | Date | Company | Code | Odds | Category</code> (one per line)</p>
       <textarea id="bulkInput" style="width:100%;padding:12px;border:2px solid var(--200);border-radius:var(--rs);font-family:inherit;font-size:13px;outline:none;background:var(--50);color:var(--800);min-height:120px;resize:vertical" placeholder="Liverpool vs Arsenal | 2024-12-25 | Bet9ja | 1X2-ABC | 2.50 | football"></textarea>
       <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-sea" onclick="bulkImport()">📦 Import All</button>
@@ -515,6 +510,18 @@
     c.innerHTML = '<div class="tips-grid">' + sorted.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
   }
 
+  function checkPrediction(pick, hs, as) {
+    const p = pick.toUpperCase();
+    if (p === '1') return hs > as;
+    if (p === '2') return as > hs;
+    if (p === 'X') return hs === as;
+    if (p === 'GG') return hs > 0 && as > 0;
+    if (p === 'NG') return hs === 0 || as === 0;
+    const om = p.match(/^O(\d+\.?\d*)$/); if (om) return (hs + as) > parseFloat(om[1]);
+    const um = p.match(/^U(\d+\.?\d*)$/); if (um) return (hs + as) < parseFloat(um[1]);
+    return null;
+  }
+
   function getSelectionHTML(t) {
     if (!t.predictions || !t.predictions.length) return '';
     const lines = t.predictions.map(p => {
@@ -522,14 +529,13 @@
       const m = scores[key];
       let status = '⏳', cls = 'sel-pend';
       if (m && (m.status === 'finished' || (m.home_score != null && m.away_score != null && m.status !== 'live'))) {
-        const homeWon = m.home_score > m.away_score;
-        const awayWon = m.away_score > m.home_score;
-        const draw = m.home_score === m.away_score;
-        const correct = (p.pick === '1' && homeWon) || (p.pick === '2' && awayWon) || (p.pick === 'X' && draw);
-        status = correct ? '✅ Won' : '❌ Lost';
-        cls = correct ? 'sel-won' : 'sel-lost';
+        const correct = checkPrediction(p.pick, m.home_score, m.away_score);
+        if (correct !== null) {
+          status = correct ? '✅ Won' : '❌ Lost';
+          cls = correct ? 'sel-won' : 'sel-lost';
+        }
       }
-      return '<div class="sel-row ' + cls + '"><span class="sel-match">' + esc(p.home) + ' vs ' + esc(p.away) + '</span><span class="sel-pick">' + (p.pick==='1'?'1':p.pick==='2'?'2':'X') + '</span><span class="sel-status">' + status + '</span></div>';
+      return '<div class="sel-row ' + cls + '"><span class="sel-match">' + esc(p.home) + ' vs ' + esc(p.away) + '</span><span class="sel-pick">' + esc(p.pick) + '</span><span class="sel-status">' + status + '</span></div>';
     }).join('');
     return '<div class="selections-box"><div class="sel-header">📋 Selections</div>' + lines + '</div>';
   }
@@ -544,7 +550,6 @@
     const catIcon = cat[t.category] || '📌';
     const stars = '★'.repeat(t.confidence || 3) + '☆'.repeat(5 - (t.confidence || 3));
     const ft = t.featured ? '<span style="font-size:11px;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:12px;margin-left:6px">🔥 Featured</span>' : '';
-    const tm = (t.home_team || t.away_team) ? `<div class="tip-row"><span class="tip-label">Match</span><span class="tip-value">${esc(t.home_team||'?')} vs ${esc(t.away_team||'?')}</span></div>` : '';
     const stk = t.stake ? `<div class="tip-row"><span class="tip-label">Stake</span><span class="tip-value">KES ${parseFloat(t.stake).toLocaleString()}</span></div>` : '';
     return `<div class="tip-card" style="animation-delay:${Math.min(i * .06, .3)}s">
       <div class="tip-card-header">
@@ -553,7 +558,7 @@
       </div>
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">Company</span><span class="tip-value">${esc(t.company)}</span></div>
-        ${od}${tm}${stk}
+        ${od}${stk}
         <div class="tip-row"><span class="tip-label">Code</span><span class="tip-value code">${esc(t.code)}</span></div>
         <div class="tip-row">
           <span class="tip-label">Result</span>
@@ -579,23 +584,24 @@
     </div>`;
   }
 
-  async function autoMarkResult(id) {
-    const t = tips.find(x => x.id === id);
-    if (!t || !t.predictions || !t.predictions.length) { showToast('No predictions to check', 'error'); return; }
-    const preds = t.predictions;
+  function calcAutoResult(predictions) {
+    if (!predictions || !predictions.length) return null;
     let allResolved = true, anyLost = false;
-    for (const p of preds) {
+    for (const p of predictions) {
       const key = (p.home||'').toLowerCase().trim() + '|' + (p.away||'').toLowerCase().trim();
       const m = scores[key];
-      if (!m || m.status !== 'finished') { allResolved = false; continue; }
-      const homeWon = m.home_score > m.away_score;
-      const awayWon = m.away_score > m.home_score;
-      const draw = m.home_score === m.away_score;
-      const correct = (p.pick === '1' && homeWon) || (p.pick === '2' && awayWon) || (p.pick === 'X' && draw);
-      if (!correct) anyLost = true;
+      if (!m || m.status !== 'finished' || checkPrediction(p.pick, m.home_score, m.away_score) === null) { allResolved = false; continue; }
+      if (!checkPrediction(p.pick, m.home_score, m.away_score)) anyLost = true;
     }
-    if (!allResolved) { showToast('Not all matches finished yet', 'error'); return; }
-    const newResult = anyLost ? 'lost' : 'won';
+    if (!allResolved) return null;
+    return anyLost ? 'lost' : 'won';
+  }
+
+  async function autoMarkResult(id) {
+    const t = tips.find(x => x.id === id);
+    if (!t || !t.predictions || !t.predictions.length) { showToast('No selections to check', 'error'); return; }
+    const newResult = calcAutoResult(t.predictions);
+    if (!newResult) { showToast('Not all matches finished yet', 'error'); return; }
     const r = await updateTip(id, { result: newResult });
     if (r) { showToast('Auto-marked as ' + newResult.toUpperCase() + '!', 'success'); await fetchTips(); }
   }
@@ -604,10 +610,10 @@
 
   function exportCSV() {
     if (!tips.length) { showToast('No tips to export', 'error'); return; }
-    const headers = 'Name,Date,Company,Code,Odds,Result,Category,Confidence,Stake,Featured,HomeTeam,AwayTeam,Predictions,Note,Created';
+    const headers = 'Name,Date,Company,Category,Odds,Code,Selections,Note,Confidence,Stake,Featured,Result,Created';
     const rows = tips.map(t => {
       const preds = (t.predictions||[]).map(p => p.home+' vs '+p.away+' ('+p.pick+')').join('; ');
-      const vals = [t.name, t.date, t.company, t.code, t.odds, t.result||'pending', t.category||'other', t.confidence||3, t.stake||0, t.featured?'Yes':'No', t.home_team||'', t.away_team||'', preds, (t.note||'').replace(/,/g,';'), t.created];
+      const vals = [t.name, t.date, t.company, t.category||'other', t.odds, t.code, preds, (t.note||'').replace(/,/g,';'), t.confidence||3, t.stake||0, t.featured?'Yes':'No', t.result||'pending', t.created];
       return '"' + vals.join('","') + '"';
     });
     const csv = headers + '\n' + rows.join('\n');
@@ -629,10 +635,8 @@
     document.getElementById('tipResult').value = t.result || 'pending';
     document.getElementById('tipStake').value = t.stake || '';
     document.getElementById('tipFeatured').checked = !!t.featured;
-    document.getElementById('tipHomeTeam').value = t.home_team || '';
-    document.getElementById('tipAwayTeam').value = t.away_team || '';
     document.getElementById('tipNote').value = t.note || '';
-    document.getElementById('tipPredictions').value = (t.predictions || []).map(p => p.home + ' | ' + p.away + ' | ' + p.pick).join('\n');
+    document.getElementById('tipPredictions').value = (t.predictions || []).map(p => p.home + ' vs ' + p.away + ' | ' + p.pick).join('\n');
     editingId = id;
     document.getElementById('submitBtn').textContent = '💾 Update Tip';
     document.getElementById('formTitle').textContent = '✏️ Edit Tip';
@@ -681,18 +685,17 @@
     const result = document.getElementById('tipResult').value;
     const stake = document.getElementById('tipStake').value.trim();
     const featured = document.getElementById('tipFeatured').checked;
-    const home_team = document.getElementById('tipHomeTeam').value.trim();
-    const away_team = document.getElementById('tipAwayTeam').value.trim();
     const note = document.getElementById('tipNote').value.trim();
     const predText = document.getElementById('tipPredictions').value.trim();
     const predictions = predText ? predText.split('\n').filter(l => l.trim()).map(l => {
       const parts = l.split('|').map(s => s.trim());
-      return { home: parts[0] || '', away: parts[1] || '', pick: (parts[2] || '').toUpperCase() };
-    }).filter(p => p.home && p.away && ['1','2','X'].includes(p.pick)) : [];
+      const teams = (parts[0] || '').split(/\s+vs\s+/i).map(s => s.trim());
+      return { home: teams[0] || '', away: teams[1] || '', pick: (parts[1] || '').toUpperCase() };
+    }).filter(p => p.home && p.away && p.pick) : [];
     if (!name || !date || !company || !code) { showToast('Fill all required fields', 'error'); return; }
     const btn = document.getElementById('submitBtn');
     btn.textContent = '⏳ Saving...'; btn.disabled = true;
-    const payload = { name, date, company, code, odds, category, confidence: parseInt(confidence), result, stake: parseFloat(stake) || 0, featured, note, home_team, away_team, predictions };
+    const payload = { name, date, company, code, odds, category, confidence: parseInt(confidence), result, stake: parseFloat(stake) || 0, featured, note, predictions };
     if (editingId) {
       const r = await updateTip(editingId, payload);
       if (r) { resetForm(); await fetchTips(); showToast('Tip updated! ✓', 'success'); }
@@ -723,8 +726,6 @@
     document.getElementById('tipForm').reset();
     document.getElementById('submitBtn').textContent = '🚀 Post Tip';
     document.getElementById('tipDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('tipHomeTeam').value = '';
-    document.getElementById('tipAwayTeam').value = '';
     document.getElementById('tipPredictions').value = '';
     document.getElementById('formTitle').textContent = '✏️ Post a Tip';
     editingId = null;
@@ -872,7 +873,7 @@
     const lines = text.split('\n').filter(l => l.trim());
     const tips = lines.map(line => {
       const parts = line.split('|').map(s => s.trim());
-      return { name: parts[0] || '', date: parts[1] || '', company: parts[2] || '', code: parts[3] || '', odds: parts[4] || '', category: parts[5] || 'other', confidence: 3, home_team: parts[6] || '', away_team: parts[7] || '' };
+      return { name: parts[0] || '', date: parts[1] || '', company: parts[2] || '', code: parts[3] || '', odds: parts[4] || '', category: parts[5] || 'other', confidence: 3 };
     }).filter(t => t.name && t.date && t.company && t.code);
     if (!tips.length) { showToast('No valid tips found', 'error'); return; }
     try {

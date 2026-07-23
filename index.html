@@ -86,11 +86,6 @@
     .result-badge.won { background: #166534; color: #bbf7d0; }
     .result-badge.lost { background: #991b1b; color: #fecaca; }
 
-    .score-badge { padding: 8px 16px; font-size: 13px; font-weight: 700; text-align: center; border-bottom: 1px solid var(--100); display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .score-badge.score-live { background: rgba(239,68,68,.08); color: #ef4444; }
-    .score-badge.score-fin { background: rgba(34,197,94,.08); color: #22c55e; }
-    .score-badge.score-up { background: rgba(100,116,139,.08); color: var(--500); }
-
     .tip-card-body { padding: 16px 20px; }
     .tip-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--100); gap: 10px; }
     .tip-row:last-of-type { border-bottom: none; }
@@ -411,16 +406,16 @@
     navigator.clipboard.writeText(codes).then(() => showToast('Copied ' + tips.filter(t => (t.result||'pending')==='pending').length + ' codes!')).catch(() => showToast('Could not copy'));
   }
 
-  function getScoreHTML(t) {
-    if (!t.home_team && !t.away_team) return '';
-    const key = (t.home_team||'').toLowerCase().trim() + '|' + (t.away_team||'').toLowerCase().trim();
-    const m = scores[key];
-    if (!m) return '';
-    const sc = (m.home_score != null && m.away_score != null) ? m.home_score + '-' + m.away_score : '';
-    const status = m.status || '';
-    const cls = status === 'live' ? 'score-live' : (status === 'finished' ? 'score-fin' : 'score-up');
-    const icon = status === 'live' ? '🔴' : (status === 'finished' ? '✅' : '📅');
-    return '<div class="score-badge ' + cls + '">' + icon + ' ' + esc(t.home_team||'?') + ' ' + sc + ' ' + esc(t.away_team||'?') + ' <span style="font-size:10px;opacity:.7">' + status + '</span></div>';
+  function checkPrediction(pick, hs, as) {
+    const p = pick.toUpperCase();
+    if (p === '1') return hs > as;
+    if (p === '2') return as > hs;
+    if (p === 'X') return hs === as;
+    if (p === 'GG') return hs > 0 && as > 0;
+    if (p === 'NG') return hs === 0 || as === 0;
+    const om = p.match(/^O(\d+\.?\d*)$/); if (om) return (hs + as) > parseFloat(om[1]);
+    const um = p.match(/^U(\d+\.?\d*)$/); if (um) return (hs + as) < parseFloat(um[1]);
+    return null;
   }
 
   function getSelectionHTML(t) {
@@ -430,15 +425,14 @@
       const m = scores[key];
       let status = '⏳', cls = 'sel-pend';
       if (m && (m.status === 'finished' || (m.home_score != null && m.away_score != null && m.status !== 'live'))) {
-        const homeWon = m.home_score > m.away_score;
-        const awayWon = m.away_score > m.home_score;
-        const draw = m.home_score === m.away_score;
-        const correct = (p.pick === '1' && homeWon) || (p.pick === '2' && awayWon) || (p.pick === 'X' && draw);
-        status = correct ? '✅ Won' : '❌ Lost';
-        cls = correct ? 'sel-won' : 'sel-lost';
+        const correct = checkPrediction(p.pick, m.home_score, m.away_score);
+        if (correct !== null) {
+          status = correct ? '✅ Won' : '❌ Lost';
+          cls = correct ? 'sel-won' : 'sel-lost';
+        }
       }
       const sc = (m && m.home_score != null && m.away_score != null) ? m.home_score + '-' + m.away_score : '';
-      return '<div class="sel-row ' + cls + '"><span class="sel-match">' + esc(p.home) + ' vs ' + esc(p.away) + (sc ? ' <span class="sel-score">' + sc + '</span>' : '') + '</span><span class="sel-pick">' + (p.pick==='1'?'1':p.pick==='2'?'2':'X') + '</span><span class="sel-status">' + status + '</span></div>';
+      return '<div class="sel-row ' + cls + '"><span class="sel-match">' + esc(p.home) + ' vs ' + esc(p.away) + (sc ? ' <span class="sel-score">' + sc + '</span>' : '') + '</span><span class="sel-pick">' + esc(p.pick) + '</span><span class="sel-status">' + status + '</span></div>';
     }).join('');
     return '<div class="selections-box"><div class="sel-header">📋 Selections</div>' + lines + '</div>';
   }
@@ -461,7 +455,6 @@
         <div class="tip-name">${cat[t.category]||'📌'} ${esc(t.name)}${ft} <span class="result-badge ${result}">${badge[result]}</span></div>
         <div class="tip-date">📅 ${ds} &nbsp; <span style="opacity:.7">${stars}</span></div>
       </div>
-      ${getScoreHTML(t)}
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">🏢 Company</span><span class="tip-value">${esc(t.company)}</span></div>
         ${od}${stk}
