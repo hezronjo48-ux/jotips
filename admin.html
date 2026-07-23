@@ -709,12 +709,23 @@
     const stake = document.getElementById('tipStake').value.trim();
     const featured = document.getElementById('tipFeatured').checked;
     const note = document.getElementById('tipNote').value.trim();
-    const predText = document.getElementById('tipPredictions').value.trim();
-    const predictions = predText ? predText.split('\n').filter(l => l.trim()).map(l => {
-      const parts = l.split('|').map(s => s.trim());
-      const teams = (parts[0] || '').split(/\s+vs\s+/i).map(s => s.trim());
-      return { home: teams[0] || '', away: teams[1] || '', pick: (parts[1] || '').toUpperCase() };
-    }).filter(p => p.home && p.away && p.pick) : [];
+      const predText = document.getElementById('tipPredictions').value.trim();
+      const predictions = predText ? predText.split('\n').filter(l => l.trim()).map(l => {
+        const parts = l.split('|').map(s => s.trim());
+        // Support both "TeamA vs TeamB | 1" and "TeamA | TeamB | 1"
+        const teamStr = parts[0] || '';
+        const pick = (parts[1] || parts[2] || '').toUpperCase();
+        let home = '', away = '';
+        if (teamStr.match(/\s+vs?\s+/i)) {
+          const t = teamStr.split(/\s+vs?\s+/i);
+          home = (t[0]||'').trim(); away = (t[1]||'').trim();
+        } else if (parts.length >= 3) {
+          // TeamA | TeamB | 1 format
+          home = teamStr; away = (parts[1]||'').trim();
+        }
+        return { home, away, pick };
+      }).filter(p => p.home && p.away && p.pick) : [];
+      if (predText && !predictions.length) { showToast('Selection format: TeamA vs TeamB | Prediction', 'error'); }
     if (!name || !date || !company || !code) { showToast('Fill all required fields', 'error'); return; }
     const btn = document.getElementById('submitBtn');
     btn.textContent = '⏳ Saving...'; btn.disabled = true;
