@@ -58,25 +58,23 @@ function ghFetch(path) {
 
 async function loadFromGitHub() {
   if (!GITHUB_TOKEN) return;
-  for (const [file, loader] of [['tips.json', (d) => { if (d.length > 2) fs.writeFileSync(DATA_FILE, d, 'utf-8'); }], ['comments.json', (d) => { if (d.length > 2) fs.writeFileSync(COMMENTS_FILE, d, 'utf-8'); }], ['analytics.json', (d) => { if (d.length > 2) fs.writeFileSync(ANALYTICS_FILE, d, 'utf-8'); }], ['links.json', (d) => { if (d.length > 2) fs.writeFileSync(LINKS_FILE, d, 'utf-8'); }]]) {
+  for (const [file, loader, localPath] of [['tips.json', (d) => fs.writeFileSync(DATA_FILE, d, 'utf-8'), DATA_FILE], ['comments.json', (d) => fs.writeFileSync(COMMENTS_FILE, d, 'utf-8'), COMMENTS_FILE], ['analytics.json', (d) => fs.writeFileSync(ANALYTICS_FILE, d, 'utf-8'), ANALYTICS_FILE], ['links.json', (d) => fs.writeFileSync(LINKS_FILE, d, 'utf-8'), LINKS_FILE]]) {
     try {
-      const localFile = path.join(__dirname, file);
-      const localContent = fs.existsSync(localFile) ? fs.readFileSync(localFile, 'utf-8') : '';
-      // ALWAYS try to load from GitHub on fresh instance, but only overwrite if GitHub has more data
       const r = await ghFetch(file);
       if (!r.ok) continue;
       const j = await r.json();
       const ghContent = Buffer.from(j.content, 'base64').toString('utf-8');
       shaCache[file] = j.sha;
-      // Only overwrite local if GitHub has real content and local is empty/barely initialized
-      if (ghContent.length > 2 && localContent.length <= 2) {
+      // GitHub is source of truth — always overwrite local with GitHub data
+      if (ghContent.length > 2) {
         loader(ghContent);
         console.log('GitHub restored ' + file + ' (' + ghContent.length + ' bytes)');
-      } else if (ghContent.length > 2 && localContent.length > 2) {
-        // Both have data — merge: keep local, push local to GitHub to ensure it's backed up
-        console.log('Local ' + file + ' has data, pushing backup...');
-        ghPush(file, localContent);
       }
+      // Also push local as backup (covers case where local is newer than GitHub)
+      try {
+        const localData = fs.readFileSync(localPath, 'utf-8');
+        if (localData && localData.length > 2) await ghPush(file, localData);
+      } catch (e) { /* skip if local file error */ }
     } catch (e) { console.error('GitHub load error for ' + file + ':', e.message); }
   }
 }
@@ -201,6 +199,11 @@ app.put('/api/tips/:id', adminAuth, (req, res) => {
   tips[idx] = { ...tips[idx], ...req.body, id: tips[idx].id, created: tips[idx].created };
   saveTips(tips);
   res.json({ success: true, tip: tips[idx] });
+});
+
+app.delete('/api/tips', adminAuth, (req, res) => {
+  saveTips([]);
+  res.json({ success: true, message: 'All tips cleared' });
 });
 
 app.delete('/api/tips/:id', adminAuth, (req, res) => {
