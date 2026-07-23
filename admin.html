@@ -299,6 +299,7 @@
       <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-sea" onclick="bulkImport()">📦 Import All</button>
         <button class="btn btn-so" onclick="copyAllCodes()">📋 Copy All Codes</button>
+        <button class="btn btn-so" onclick="exportCSV()">📥 Export CSV</button>
       </div>
       <div id="bulkResult" style="margin-top:8px;font-size:13px;color:var(--500)"></div>
     </div>
@@ -512,6 +513,20 @@
   }
 
   function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+  function exportCSV() {
+    if (!tips.length) { showToast('No tips to export', 'error'); return; }
+    const headers = 'Name,Date,Company,Code,Odds,Result,Category,Confidence,Stake,Featured,Note,Created';
+    const rows = tips.map(t => {
+      const vals = [t.name, t.date, t.company, t.code, t.odds, t.result||'pending', t.category||'other', t.confidence||3, t.stake||0, t.featured?'Yes':'No', (t.note||'').replace(/,/g,';'), t.created];
+      return '"' + vals.join('","') + '"';
+    });
+    const csv = headers + '\n' + rows.join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'jotips-export-' + new Date().toISOString().split('T')[0] + '.csv'; a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('Exported ' + tips.length + ' tips!', 'success');
+  }
 
   function editTip(id) {
     const t = tips.find(x => x.id === id); if (!t) return;

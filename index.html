@@ -224,6 +224,7 @@
     <div class="stat-card"><div class="num red" id="statLost">0</div><div class="label">Lost ❌</div></div>
     <div class="stat-card"><div class="num blue" id="statRate">0%</div><div class="label">Win Rate</div></div>
   </div>
+  <div id="catStats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"></div>
 
     <div class="controls">
       <input type="text" class="search-box" id="searchBox" placeholder="Search by company, name, or code..." oninput="filterTips()">
@@ -307,6 +308,19 @@
     document.getElementById('countLost').textContent = lost;
     document.getElementById('countPending').textContent = tips.filter(t => (t.result||'pending') === 'pending').length;
     document.getElementById('tipCount').textContent = total;
+    // Category stats
+    const cats = ['football','basketball','tennis','other'];
+    const catLabels = { football:'⚽ Football', basketball:'🏀 Basketball', tennis:'🎾 Tennis', other:'📌 Other' };
+    const catEl = document.getElementById('catStats');
+    catEl.innerHTML = cats.map(c => {
+      const inCat = tips.filter(t => (t.category||'other') === c);
+      if (!inCat.length) return '';
+      const cWon = inCat.filter(t => t.result === 'won').length;
+      const cLost = inCat.filter(t => t.result === 'lost').length;
+      const cRate = (cWon + cLost) > 0 ? Math.round(cWon / (cWon + cLost) * 100) : 0;
+      const pending = inCat.filter(t => (t.result||'pending') === 'pending').length;
+      return '<span style="display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:var(--100);border:1px solid var(--200);border-radius:20px;font-size:12px;color:var(--600)">' + (catLabels[c]||c) + ' ' + cWon + '✅ ' + cLost + '❌ <strong style="color:' + ((cWon+cLost)>0 ? '#4ade80' : 'var(--400)') + '">' + ((cWon+cLost) > 0 ? cRate + '%' : '-') + '</strong>' + (pending ? ' <span style="color:var(--400)">·</span> <span style="color:var(--400)">' + pending + ' ⏳</span>' : '') + '</span>';
+    }).filter(Boolean).join('');
   }
 
   function setFilter(filter, btn) {
@@ -327,11 +341,12 @@
     currentSearch = document.getElementById('searchBox').value.toLowerCase().trim();
     const showExpired = document.getElementById('showExpired').checked;
     const sortVal = document.getElementById('sortSelect').value;
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const today = new Date(); today.setHours(23,59,59,0);
     let filtered = tips.filter(t => {
       if (currentFilter !== 'all' && (t.result || 'pending') !== currentFilter) return false;
       if (currentCategory !== 'all' && (t.category || 'other') !== currentCategory) return false;
-      if (!showExpired && new Date(t.date).getTime() < sevenDaysAgo) return false;
+      const tipDate = new Date(t.date + 'T23:59:59');
+      if (!showExpired && tipDate < today) return false;
       if (currentSearch) {
         const searchable = (t.name + ' ' + t.company + ' ' + t.code).toLowerCase();
         if (searchable.indexOf(currentSearch) === -1) return false;
