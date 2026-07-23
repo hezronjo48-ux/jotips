@@ -225,15 +225,35 @@
     <div class="stat-card"><div class="num blue" id="statRate">0%</div><div class="label">Win Rate</div></div>
   </div>
 
-  <div class="controls">
-    <input type="text" class="search-box" id="searchBox" placeholder="Search by company, name, or code..." oninput="filterTips()">
-    <div class="filter-tabs">
-      <button class="filter-tab active" data-filter="all" onclick="setFilter('all',this)">All <span class="count" id="countAll">0</span></button>
-      <button class="filter-tab" data-filter="won" onclick="setFilter('won',this)">✅ Won <span class="count" id="countWon">0</span></button>
-      <button class="filter-tab" data-filter="lost" onclick="setFilter('lost',this)">❌ Lost <span class="count" id="countLost">0</span></button>
-      <button class="filter-tab" data-filter="pending" onclick="setFilter('pending',this)">⏳ Pending <span class="count" id="countPending">0</span></button>
+    <div class="controls">
+      <input type="text" class="search-box" id="searchBox" placeholder="Search by company, name, or code..." oninput="filterTips()">
+      <div class="filter-tabs" style="width:100%">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="filter-tab active" data-filter="all" onclick="setFilter('all',this)">All <span class="count" id="countAll">0</span></button>
+          <button class="filter-tab" data-filter="won" onclick="setFilter('won',this)">✅ Won <span class="count" id="countWon">0</span></button>
+          <button class="filter-tab" data-filter="lost" onclick="setFilter('lost',this)">❌ Lost <span class="count" id="countLost">0</span></button>
+          <button class="filter-tab" data-filter="pending" onclick="setFilter('pending',this)">⏳ Pending <span class="count" id="countPending">0</span></button>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+          <button class="filter-tab active" data-cat="all" onclick="setCategory('all',this)">📌 All</button>
+          <button class="filter-tab" data-cat="football" onclick="setCategory('football',this)">⚽ Football</button>
+          <button class="filter-tab" data-cat="basketball" onclick="setCategory('basketball',this)">🏀 Basketball</button>
+          <button class="filter-tab" data-cat="tennis" onclick="setCategory('tennis',this)">🎾 Tennis</button>
+          <button class="filter-tab" data-cat="other" onclick="setCategory('other',this)">📌 Other</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center">
+          <select id="sortSelect" style="padding:7px 10px;border:2px solid var(--200);border-radius:7px;font-family:inherit;font-size:12px;background:var(--100);color:var(--700);outline:none" onchange="filterTips()">
+            <option value="date">Sort by Date</option>
+            <option value="odds">Sort by Odds</option>
+            <option value="confidence">Sort by Confidence</option>
+          </select>
+          <button class="btn btn-xs btn-sea-outline" onclick="copyAllCodes()">📋 Copy Pending Codes</button>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--400);cursor:pointer">
+            <input type="checkbox" id="showExpired" onchange="filterTips()" checked> Show expired
+          </label>
+        </div>
+      </div>
     </div>
-  </div>
 
   <div id="tipsContainer"></div>
 </div>
@@ -250,7 +270,7 @@
 <script>
   const API = window.location.origin + '/api/tips';
   const COMMENT_API = window.location.origin + '/api/comments';
-  let tips = [], currentFilter = 'all', currentSearch = '';
+  let tips = [], currentFilter = 'all', currentCategory = 'all', currentSearch = '';
 
   async function loadTips() {
     const c = document.getElementById('tipsContainer');
@@ -291,27 +311,51 @@
 
   function setFilter(filter, btn) {
     currentFilter = filter;
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('[data-filter]').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    filterTips();
+  }
+
+  function setCategory(cat, btn) {
+    currentCategory = cat;
+    document.querySelectorAll('[data-cat]').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     filterTips();
   }
 
   function filterTips() {
     currentSearch = document.getElementById('searchBox').value.toLowerCase().trim();
+    const showExpired = document.getElementById('showExpired').checked;
+    const sortVal = document.getElementById('sortSelect').value;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     let filtered = tips.filter(t => {
       if (currentFilter !== 'all' && (t.result || 'pending') !== currentFilter) return false;
+      if (currentCategory !== 'all' && (t.category || 'other') !== currentCategory) return false;
+      if (!showExpired && new Date(t.date).getTime() < sevenDaysAgo) return false;
       if (currentSearch) {
         const searchable = (t.name + ' ' + t.company + ' ' + t.code).toLowerCase();
         if (searchable.indexOf(currentSearch) === -1) return false;
       }
       return true;
     });
+    // Sort
+    if (sortVal === 'odds') filtered.sort((a, b) => (parseFloat(b.odds) || 0) - (parseFloat(a.odds) || 0));
+    else if (sortVal === 'confidence') filtered.sort((a, b) => (b.confidence || 0) - (a.confidence || 0));
+    else filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Featured first
+    filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     const c = document.getElementById('tipsContainer');
     if (!filtered.length) {
       c.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>No tips match</h3><p>Try a different search or filter</p></div>';
       return;
     }
     c.innerHTML = '<div class="tips-grid">' + filtered.map((t, i) => cardHTML(t, t.id, i)).join('') + '</div>';
+  }
+
+  function copyAllCodes() {
+    const codes = tips.filter(t => (t.result || 'pending') === 'pending').map(t => t.code).join('\n');
+    if (!codes) { showToast('No pending codes'); return; }
+    navigator.clipboard.writeText(codes).then(() => showToast('Copied ' + tips.filter(t => (t.result||'pending')==='pending').length + ' codes!')).catch(() => showToast('Could not copy'));
   }
 
   function cardHTML(t, id, i) {
@@ -321,16 +365,20 @@
     const od = t.odds ? `<div class="tip-row"><span class="tip-label">🎯 Odds</span><span class="tip-value" style="color:#16a34a;font-weight:800">@ ${esc(t.odds)}</span></div>` : '';
     const result = t.result || 'pending';
     const badge = { pending: '⏳ Pending', won: '✅ Won', lost: '❌ Lost' };
+    const cat = { football: '⚽', basketball: '🏀', tennis: '🎾', other: '📌' };
+    const stars = '★'.repeat(t.confidence || 3) + '☆'.repeat(5 - (t.confidence || 3));
+    const ft = t.featured ? '<span style="font-size:10px;background:rgba(255,255,255,.15);padding:2px 6px;border-radius:10px;margin-left:4px">🔥 Featured</span>' : '';
+    const stk = t.stake ? `<div class="tip-row"><span class="tip-label">💰 Stake</span><span class="tip-value">KES ${parseFloat(t.stake).toLocaleString()}</span></div>` : '';
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(`💰 ${t.name} - ${t.company}\nCode: ${t.code}\nOdds: ${t.odds || '-'}\nvia JOTIPS`);
     return `<div class="tip-card" style="animation-delay:${Math.min(i * .04, .35)}s">
       <div class="tip-card-header">
-        <div class="tip-name">${esc(t.name)} <span class="result-badge ${result}">${badge[result]}</span></div>
-        <div class="tip-date">📅 ${ds}</div>
+        <div class="tip-name">${cat[t.category]||'📌'} ${esc(t.name)}${ft} <span class="result-badge ${result}">${badge[result]}</span></div>
+        <div class="tip-date">📅 ${ds} &nbsp; <span style="opacity:.7">${stars}</span></div>
       </div>
       <div class="tip-card-body">
         <div class="tip-row"><span class="tip-label">🏢 Company</span><span class="tip-value">${esc(t.company)}</span></div>
-        ${od}
+        ${od}${stk}
         <div class="tip-row"><span class="tip-label">🔑 Code</span><div class="code-wrap"><span class="tip-value code">${esc(t.code)}</span><button class="copy-btn" onclick="copyCode('${esc(t.code)}',this,'${id}')" title="Copy code">📋</button></div></div>
         ${n}
         <div class="comments-section">

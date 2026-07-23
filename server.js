@@ -140,6 +140,8 @@ app.post('/api/tips', adminAuth, (req, res) => {
   const tip = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     name, date, company, code, odds: odds || '', result: result || 'pending', note: note || '',
+    category: req.body.category || 'other', confidence: Math.min(5, Math.max(1, parseInt(req.body.confidence) || 3)),
+    featured: !!req.body.featured, stake: parseFloat(req.body.stake) || 0,
     created: new Date().toISOString()
   };
   const t = loadTips(); t.push(tip); saveTips(t);
@@ -218,6 +220,36 @@ app.post('/api/analytics/tip-view/:id', (req, res) => {
   a.tipViews[req.params.id] = (a.tipViews[req.params.id] || 0) + 1;
   saveAnalytics(a, false);
   res.json({ success: true });
+});
+
+// --- Bulk import ---
+app.post('/api/tips/bulk', adminAuth, (req, res) => {
+  const { tips: items } = req.body;
+  if (!items || !items.length) return res.status(400).json({ error: 'No tips provided' });
+  const now = new Date().toISOString();
+  const created = items.map(item => ({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 4),
+    name: (item.name || '').trim(), date: item.date || '', company: (item.company || '').trim(),
+    code: (item.code || '').trim(), odds: (item.odds || '').toString(), result: 'pending',
+    note: (item.note || '').trim(), category: item.category || 'other',
+    confidence: Math.min(5, Math.max(1, parseInt(item.confidence) || 3)), featured: !!item.featured,
+    stake: parseFloat(item.stake) || 0, created: now
+  }));
+  const t = loadTips(); t.push(...created); saveTips(t);
+  res.json({ success: true, count: created.length, tips: created });
+});
+
+// --- Bankroll ---
+app.get('/api/bankroll', (req, res) => {
+  const tips = loadTips();
+  let totalStake = 0, totalPayout = 0, won = 0, lost = 0;
+  tips.forEach(t => {
+    const stk = parseFloat(t.stake) || 0;
+    const ods = parseFloat(t.odds) || 0;
+    if (t.result === 'won' && stk > 0 && ods > 0) { totalStake += stk; totalPayout += stk * ods; won++; }
+    else if (t.result === 'lost' && stk > 0) { totalStake += stk; lost++; }
+  });
+  res.json({ totalStake: Math.round(totalStake * 100) / 100, totalPayout: Math.round(totalPayout * 100) / 100, profit: Math.round((totalPayout - totalStake) * 100) / 100, won, lost, roi: totalStake > 0 ? Math.round((totalPayout - totalStake) / totalStake * 100) : 0 });
 });
 
 // --- Config check ---
