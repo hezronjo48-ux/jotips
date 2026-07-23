@@ -66,21 +66,21 @@ async function loadFromGitHub() {
       const ghContent = Buffer.from(j.content, 'base64').toString('utf-8');
       shaCache[file] = j.sha;
       // GitHub is source of truth — always overwrite local with GitHub data
-      if (ghContent.length > 2) {
+      if (ghContent.length >= 2) {
         loader(ghContent);
         console.log('GitHub restored ' + file + ' (' + ghContent.length + ' bytes)');
       }
       // Also push local as backup (covers case where local is newer than GitHub)
       try {
         const localData = fs.readFileSync(localPath, 'utf-8');
-        if (localData && localData.length > 2) await ghPush(file, localData);
+        if (localData) await ghPush(file, localData);
       } catch (e) { /* skip if local file error */ }
     } catch (e) { console.error('GitHub load error for ' + file + ':', e.message); }
   }
 }
 
 async function ghPush(file, data) {
-  if (!GITHUB_TOKEN || !data || data.length <= 2) return;
+  if (!GITHUB_TOKEN || !data || data.length < 2) return;
   const content = Buffer.from(data, 'utf-8').toString('base64');
   const body = { message: 'Auto-sync ' + file + ' [' + new Date().toISOString().slice(0,19) + ']', content: content };
   if (shaCache[file]) body.sha = shaCache[file];
@@ -122,7 +122,7 @@ async function syncNow() {
     for (const [file, localPath] of files) {
       try {
         const data = fs.readFileSync(localPath, 'utf-8');
-        if (data && data.length > 2) await ghPush(file, data);
+        if (data) await ghPush(file, data);
       } catch (e) { console.error('Sync error for ' + file + ':', e.message); }
     }
   } finally {
