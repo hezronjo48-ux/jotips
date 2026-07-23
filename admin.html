@@ -433,8 +433,8 @@
         const data = await r.json();
         const list = data.matches || [];
         for (const m of list) {
-          const key = (m.home_name||'').toLowerCase().trim() + '|' + (m.away_name||'').toLowerCase().trim();
-          all[key] = m;
+          const key = (m.home||m.home_name||'').toLowerCase().trim() + '|' + (m.away||m.away_name||'').toLowerCase().trim();
+          all[key] = { home_score: parseFloat(m.home_score), away_score: parseFloat(m.away_score), status: m.status, home: m.home||m.home_name, away: m.away||m.away_name };
         }
       } catch(e) {}
     }
@@ -517,13 +517,14 @@
 
   function checkPrediction(pick, hs, as) {
     const p = pick.toUpperCase();
-    if (p === '1') return hs > as;
-    if (p === '2') return as > hs;
-    if (p === 'X') return hs === as;
-    if (p === 'GG') return hs > 0 && as > 0;
-    if (p === 'NG') return hs === 0 || as === 0;
-    const om = p.match(/^O(\d+\.?\d*)$/); if (om) return (hs + as) > parseFloat(om[1]);
-    const um = p.match(/^U(\d+\.?\d*)$/); if (um) return (hs + as) < parseFloat(um[1]);
+    const h = parseFloat(hs), a = parseFloat(as);
+    if (p === '1') return h > a;
+    if (p === '2') return a > h;
+    if (p === 'X') return h === a;
+    if (p === 'GG') return h > 0 && a > 0;
+    if (p === 'NG') return h === 0 || a === 0;
+    const om = p.match(/^O(\d+\.?\d*)$/); if (om) return (h + a) > parseFloat(om[1]);
+    const um = p.match(/^U(\d+\.?\d*)$/); if (um) return (h + a) < parseFloat(um[1]);
     return null;
   }
 
@@ -540,7 +541,7 @@
     var sc = (m.home_score != null && m.away_score != null) ? m.home_score + '-' + m.away_score : '';
     var status = m.status || '';
     var cls = status === 'live' ? 'score-live' : (status === 'finished' ? 'score-fin' : 'score-up');
-    return '<div class="score-badge ' + cls + '">' + esc(h) + ' ' + sc + ' ' + esc(a) + ' &middot; ' + status + '</div>';
+    return '<div class="score-badge ' + cls + '">' + esc(m.home||h) + ' ' + sc + ' ' + esc(m.away||a) + ' &middot; ' + status + '</div>';
   }
 
   function getSelectionHTML(t) {
