@@ -119,14 +119,17 @@ async function ghPush(file, data) {
 async function syncNow() {
   if (!GITHUB_TOKEN || syncInProgress) return;
   syncInProgress = true;
-  const files = [['tips.json', DATA_FILE], ['comments.json', COMMENTS_FILE], ['analytics.json', ANALYTICS_FILE], ['links.json', LINKS_FILE]];
-  for (const [file, localPath] of files) {
-    try {
-      const data = fs.readFileSync(localPath, 'utf-8');
-      if (data && data.length > 2) await ghPush(file, data);
-    } catch (e) { console.error('Sync error for ' + file + ':', e.message); }
+  try {
+    const files = [['tips.json', DATA_FILE], ['comments.json', COMMENTS_FILE], ['analytics.json', ANALYTICS_FILE], ['links.json', LINKS_FILE]];
+    for (const [file, localPath] of files) {
+      try {
+        const data = fs.readFileSync(localPath, 'utf-8');
+        if (data && data.length > 2) await ghPush(file, data);
+      } catch (e) { console.error('Sync error for ' + file + ':', e.message); }
+    }
+  } finally {
+    syncInProgress = false;
   }
-  syncInProgress = false;
 }
 
 function startPeriodicSync() {
