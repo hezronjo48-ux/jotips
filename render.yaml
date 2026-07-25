@@ -2,6 +2,7 @@ services:
   - type: web
     name: jotips
     env: node
+    branch: master
     buildCommand: npm install
     startCommand: node server.js
     envVars:
