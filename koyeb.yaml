@@ -1,0 +1,11 @@
+name: jotips
+services:
+  - name: web
+    type: web
+    port: 3000
+    instance_type: free
+    env:
+      - key: ADMIN_TOKEN
+        value: jotips2024
+    routes:
+      - path: /

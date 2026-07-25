@@ -133,7 +133,7 @@ async function syncNow() {
 function startPeriodicSync() {
   if (!GITHUB_TOKEN) return;
   if (periodicTimer) clearInterval(periodicTimer);
-  periodicTimer = setInterval(syncNow, 60000);
+  periodicTimer = setInterval(syncNow, 600000);
   // Also fire immediately
   setTimeout(syncNow, 1000);
 }
