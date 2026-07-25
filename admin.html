@@ -428,7 +428,7 @@
     const all = {};
     for (const sport of sports) {
       try {
-        const r = await fetch('https://sportscore.com/api/widget/matches/?sport=' + sport + '&limit=50');
+        const r = await fetch('/api/live-scores?sport=' + sport);
         if (!r.ok) continue;
         const data = await r.json();
         const list = data.matches || [];

@@ -302,6 +302,19 @@ app.get('/api/bankroll', (req, res) => {
   res.json({ totalStake: Math.round(totalStake * 100) / 100, totalPayout: Math.round(totalPayout * 100) / 100, profit: Math.round((totalPayout - totalStake) * 100) / 100, won, lost, roi: totalStake > 0 ? Math.round((totalPayout - totalStake) / totalStake * 100) : 0 });
 });
 
+// --- Live scores proxy (CORS fix) ---
+app.get('/api/live-scores', async (req, res) => {
+  const sport = req.query.sport || 'football';
+  try {
+    const r = await fetch('https://sportscore.com/api/widget/matches/?sport=' + sport + '&limit=50');
+    if (!r.ok) return res.status(502).json({ error: 'SportScore upstream error' });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    res.status(502).json({ error: 'Failed to fetch live scores' });
+  }
+});
+
 // --- Config check ---
 app.get('/api/config', (req, res) => { res.json({ githubSync: !!GITHUB_TOKEN }); });
 
